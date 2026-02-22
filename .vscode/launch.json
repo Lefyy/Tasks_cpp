@@ -8,10 +8,10 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "d:/Programming_Projects/с++Projects/Tasks/Task1",
-      "program": "d:/Programming_Projects/с++Projects/Tasks/Task1/build/Debug/outDebug",
+      "cwd": "D:/Programming_Projects/c++Projects/Tasks/Task1",
+      "program": "D:/Programming_Projects/c++Projects/Tasks/Task1/main.exe",
       "MIMode": "gdb",
-      "miDebuggerPath": "gdb",
+      "miDebuggerPath": "C:/msys64/mingw64/bin/gdb.exe",
       "setupCommands": [
         {
           "description": "Enable pretty-printing for gdb",
