@@ -7,13 +7,18 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 file(GLOB TASK2_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/domain/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/service/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/repository/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/cli/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/cli/Commands/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/app/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/domain/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/service/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/repository/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/cli/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/cli/commands/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/app/*.cpp"
 )
 
 add_executable(task2 ${TASK2_SOURCES})
-target_include_directories(task2 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(task2 PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/headers
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+

@@ -21,6 +21,7 @@ public:
     bool sellResources(const ResourcePack& resources,
                        const std::unordered_map<ResourceType, int>& pricesPerUnit);
 
+    ResourcePack& stockResources() noexcept;
     const ResourcePack& stockResources() const noexcept;
 
 private:
