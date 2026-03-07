@@ -3,30 +3,46 @@
 #include <string>
 
 enum class MachineType {
-    TYPE_A,
-    TYPE_B,
-    TYPE_C
+    Excavator,
+    Bulldozer,
+    Crane,
+    Truck,
+    ConcreteMixer
 };
 
-enum class status {
-    NEW,
-    USED
+enum class MachineCondition {
+    New,
+    Used
 };
+
+enum class MachineState {
+    Available,
+    Assigned,
+    Maintenance
+};
+
 
 class Machine {
 public:
-    Machine(unsigned int id, MachineType type, unsigned int price);
+    Machine(int id, MachineType type, int purchasePrice);
 
-    void setStatus(status newStatus);
-
-    unsigned int getId() const;
+    int getId() const;
     MachineType getType() const;
-    unsigned int getPrice() const;
-    status getStatus() const;
+    int getPrice() const;
+    MachineState getState() const;
+    MachineCondition getCondition() const;
+    int getAssignedProjectId() const;
+
+    void setState(MachineState newState);
+    void setCondition(MachineCondition newCondition);
+    void setAssignedProjectId(int projectId);
+    void releaseFromProject();
 
 private:
-    unsigned int id;
-    MachineType type;
-    unsigned int price;
-    status machineStatus;
+    int id_;
+    MachineType type_;
+    int price_;
+    MachineState machineState_;
+    MachineCondition machineCondition_;
+    int assignedProjectId_;
 };

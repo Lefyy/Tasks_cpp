@@ -2,44 +2,90 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
+
 #include "machine.h"
 
-enum class Phase {
-    NOT_STARTED,
-    IN_PROGRESS,
-    COMPLETED
+enum class ResourceType {
+    Concrete,
+    Steel,
+    Wood,
+    Fuel
+};
+
+struct ResourcePack {
+    std::unordered_map<ResourceType, int> values;
+
+    int getAmountOf(ResourceType type) const;
+    void add(ResourceType type, int amount);
+    bool consume(ResourceType type, int amount);
+    bool hasAtLeast(const ResourcePack& other) const;
+};
+
+enum class ProjectState {
+    Draft,
+    Active,
+    Paused,
+    Completed,
+    Cancelled
 };
 
 struct PhaseRequirements {
-    std::vector<MachineType> machineTypes;
-    float resourceMultiplier;
+    std::unordered_map<MachineType, int> machines;
+    ResourcePack resourcesPerWeek;
+    int durationWeeks{};
 };
 
-inline const PhaseRequirements PHASE_REQS[]= {
-    PhaseRequirements{{MachineType::TYPE_A, MachineType::TYPE_B}, 0.3f},
-    PhaseRequirements{{MachineType::TYPE_B}, 0.4f},
-    PhaseRequirements{{MachineType::TYPE_C}, 0.3f}
+struct MachineRequirements {
+    MachineType machineType;
+    int quantity;
 };
+
+class ProjectPhase {
+public:
+    ProjectPhase(std::string name, PhaseRequirements requirements);
+
+    const std::string& getName() const noexcept;
+    const PhaseRequirements& getRequirements() const noexcept;
+
+private:
+    std::string name_;
+    PhaseRequirements requirements_;
+};
+
 
 class Project {
 public:
-    Project(unsigned int id, const std::string& name, unsigned int budget, unsigned int requiredResources);
+    Project(int id, std::string name, int budget, std::vector<ProjectPhase> phases);
 
-    void nextWeek();
-    void allocateResources(unsigned int amount);
+    int getId() const noexcept;
+    const std::string& getName() const noexcept;
+    int getBudget() const noexcept;
+    ProjectState getState() const noexcept;
+    std::size_t getCurrentPhaseIndex() const noexcept;
+    int getElapsedWeeksInCurrentPhase() const noexcept;
+    bool isFinished() const noexcept;
 
-    unsigned int getId() const;
-    std::string getName() const;
-    unsigned int getBudget() const;
-    Phase getCurrentPhase() const;
+
+    const ProjectPhase& currentPhase() const;
+    const std::vector<ProjectPhase>& phases() const noexcept;
+
+    void activate();
+    void pause();
+    void cancel();
+    void advanceWeek();
 
 private:
-    unsigned int id;
-    std::string name;
-    unsigned int budget;
-    unsigned int requiredResources;
-    unsigned int allocatedResources;
-    Phase currentPhase;
+    int id_{};
+    std::string name_;
+    int contractValue_{};
+    std::vector<ProjectPhase> phases_;
+    ProjectState state_{ProjectState::Draft};
+    std::size_t currentPhaseIndex_{};
+    int elapsedWeeksInCurrentPhase_{};
 
-    void nextPhase();
 };
+
+std::string toString(ResourceType type);
+std::string toString(ProjectState state);
+
