@@ -9,6 +9,20 @@
 
 class ConstructionService {
 public:
+    enum class AssignMachineResult {
+        Success,
+        MachineNotFound,
+        MachineBusy,
+        ProjectNotFound,
+        InvalidProjectState,
+    };
+
+    enum class ReleaseMachineResult {
+        Success,
+        MachineNotFound,
+        MachineNotAssigned,
+    };
+
     ConstructionService(Company& company,
                         ProjectRepository& projectRepository,
                         MachineRepository& machineRepository,
@@ -18,8 +32,8 @@ public:
     bool pauseProject(int projectId);
     bool dropProject(int projectId);
 
-    bool assignMachine(int machineId, int projectId);
-    bool releaseMachine(int machineId);
+    AssignMachineResult assignMachine(int machineId, int projectId);
+    ReleaseMachineResult releaseMachine(int machineId);
 
     std::unordered_map<int, std::vector<int>> getAssignments() const;
 

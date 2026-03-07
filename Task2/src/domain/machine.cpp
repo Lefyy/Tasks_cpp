@@ -48,3 +48,44 @@ void Machine::releaseFromProject() {
     assignedProjectId_ = -1;
     machineState_ = MachineState::Available;
 }
+
+std::string toString(MachineType type) {
+    switch (type) {
+        case MachineType::Excavator:
+            return "Excavator";
+        case MachineType::Bulldozer:
+            return "Bulldozer";
+        case MachineType::Crane:
+            return "Crane";
+        case MachineType::Truck:
+            return "Truck";
+        case MachineType::ConcreteMixer:
+            return "ConcreteMixer";
+    }
+
+    return "Unknown MachineType";
+}
+
+std::string toString(MachineCondition condition) {
+    switch (condition) {
+        case MachineCondition::New:
+            return "New";
+        case MachineCondition::Used:
+            return "Used";
+    }
+
+    return "Unknown MachineCondition";
+}
+
+std::string toString(MachineState state) {
+    switch (state) {
+        case MachineState::Available:
+            return "Available";
+        case MachineState::Assigned:
+            return "Assigned";
+        case MachineState::Maintenance:
+            return "Maintenance";
+    }
+
+    return "Unknown MachineState";
+}

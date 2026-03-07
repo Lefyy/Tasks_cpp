@@ -1,6 +1,13 @@
 #include "../../headers/app/application.h"
 
-#include <functional>
+#include "../../headers/cli/commands/assign_machine.h"
+#include "../../headers/cli/commands/buy_machine.h"
+#include "../../headers/cli/commands/next_week.h"
+#include "../../headers/cli/commands/pause_project.h"
+#include "../../headers/cli/commands/release_machine.h"
+#include "../../headers/cli/commands/stats.h"
+#include "../../headers/cli/commands/take_project.h"
+
 #include <initializer_list>
 #include <iostream>
 #include <memory>
@@ -10,25 +17,6 @@
 #include <vector>
 
 namespace {
-class FunctionalCommand final : public Command {
-public:
-    using Handler = std::function<void(const std::vector<std::string>&)>;
-
-    FunctionalCommand(std::string key, std::string description, Handler handler)
-        : key_(std::move(key)), description_(std::move(description)), handler_(std::move(handler)) {}
-
-    std::string key() const override { return key_; }
-    std::string description() const override { return description_; }
-
-    void execute(const std::vector<std::string>& args) override {
-        handler_(args);
-    }
-
-private:
-    std::string key_;
-    std::string description_;
-    Handler handler_;
-};
 
 ResourcePack makeResources(std::initializer_list<std::pair<ResourceType, int>> items) {
     ResourcePack pack;
@@ -45,6 +33,25 @@ Project makeProject(int id,
                     std::vector<ProjectPhase> phases) {
     return Project{id, name, budget, std::move(phases)};
 }
+
+void printProject(const Project& project) {
+    std::cout << "id=" << project.getId()
+              << " name='" << project.getName() << "'"
+              << " state=" << toString(project.getState())
+              << " budget=" << project.getBudget() << '\n';
+}
+
+void printResourcePack(const ResourcePack& pack) {
+    if (pack.values.empty()) {
+        std::cout << "  (none)\n";
+        return;
+    }
+
+    for (const auto& [resourceType, amount] : pack.values) {
+        std::cout << "  - " << toString(resourceType) << ": " << amount << '\n';
+    }
+}
+
 }
 
 Application::Application()
@@ -155,74 +162,13 @@ void Application::bootstrapDefaults() {
 }
 
 void Application::registerCommands() {
-    menu_.registerCommand(std::make_shared<FunctionalCommand>(
-        "help",
-        "show available commands",
-        [](const std::vector<std::string>&) {
-            std::cout << "help, next-week, stats, take <project_id>, pause <project_id>, buy-machine <type> <price>\n";
-        }));
-
-    menu_.registerCommand(std::make_shared<FunctionalCommand>(
-        "next-week",
-        "simulate next week",
-        [this](const std::vector<std::string>&) {
-            simulationService_.simulateNextWeek();
-        }));
-
-    menu_.registerCommand(std::make_shared<FunctionalCommand>(
-        "stats",
-        "print company stats",
-        [this](const std::vector<std::string>&) {
-            std::cout << "Current week: " << simulationService_.currentWeek() << '\n';
-            std::cout << "Balance: " << company_.getBalance() << '\n';
-        }));
-
-    menu_.registerCommand(std::make_shared<FunctionalCommand>(
-        "take",
-        "take project: take <project_id>",
-        [this](const std::vector<std::string>& args) {
-            if (args.empty()) {
-                return;
-            }
-
-            constructionService_.takeProject(std::stoi(args.front()));
-        }));
-
-    menu_.registerCommand(std::make_shared<FunctionalCommand>(
-        "pause",
-        "pause project: pause <project_id>",
-        [this](const std::vector<std::string>& args) {
-            if (args.empty()) {
-                return;
-            }
-
-            constructionService_.pauseProject(std::stoi(args.front()));
-        }));
-
-    menu_.registerCommand(std::make_shared<FunctionalCommand>(
-        "buy-machine",
-        "buy machine: buy-machine <type> <price>",
-        [this](const std::vector<std::string>& args) {
-            if (args.size() < 2) {
-                return;
-            }
-
-            const auto& typeRaw = args[0];
-            const auto price = std::stoi(args[1]);
-
-            MachineType machineType = MachineType::Excavator;
-            if (typeRaw == "bulldozer") {
-                machineType = MachineType::Bulldozer;
-            } else if (typeRaw == "crane") {
-                machineType = MachineType::Crane;
-            } else if (typeRaw == "truck") {
-                machineType = MachineType::Truck;
-            } else if (typeRaw == "mixer") {
-                machineType = MachineType::ConcreteMixer;
-            }
-
-            financeService_.buyMachine(machineType, price, MachineCondition::Used);
-        }));
+    menu_.registerCommand(std::make_shared<NextWeekCommand>(simulationService_, std::cout));
+    menu_.registerCommand(std::make_shared<StatsCommand>(constructionService_, simulationService_, std::cout));
+    menu_.registerCommand(std::make_shared<TakeProjectCommand>(constructionService_, std::cout));
+    menu_.registerCommand(std::make_shared<PauseProjectCommand>(constructionService_, std::cout));
+    menu_.registerCommand(std::make_shared<BuyMachineCommand>(financeService_, std::cout));
+    menu_.registerCommand(std::make_shared<AssignMachineCommand>(constructionService_, std::cout));
+    menu_.registerCommand(std::make_shared<ReleaseMachineCommand>(constructionService_, std::cout));
 }
 
 void Application::run() {

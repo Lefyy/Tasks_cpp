@@ -46,3 +46,8 @@ private:
     MachineCondition machineCondition_;
     int assignedProjectId_;
 };
+
+std::string toString(MachineType type);
+std::string toString(MachineCondition condition);
+std::string toString(MachineState state);
+

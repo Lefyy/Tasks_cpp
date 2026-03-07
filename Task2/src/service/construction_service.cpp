@@ -69,50 +69,69 @@ bool ConstructionService::dropProject(int projectId) {
     return true;
 }
 
-bool ConstructionService::assignMachine(int machineId, int projectId) {
+ConstructionService::AssignMachineResult ConstructionService::assignMachine(int machineId, int projectId) {
     const auto project = projectRepository_.findById(projectId);
     if (!project.has_value()) {
-        return false;
+        return AssignMachineResult::ProjectNotFound;
+    }
+
+    if (project->getState() != ProjectState::Active) {
+        return AssignMachineResult::InvalidProjectState;
+
     }
 
     auto machine = machineRepository_.findById(machineId);
-    if (!machine.has_value() || machine->getState() != MachineState::Available) {
-        return false;
+    if (!machine.has_value()) {
+        return AssignMachineResult::MachineNotFound;
+    }
+
+    if (machine->getState() != MachineState::Available) {
+        return AssignMachineResult::MachineBusy;
+
     }
 
     machine->setState(MachineState::Assigned);
     machine->setAssignedProjectId(projectId);
     if (!machineRepository_.update(*machine)) {
-        return false;
+        return AssignMachineResult::MachineBusy;
     }
 
     assignmentsByProject_[projectId].push_back(machineId);
-    return true;
+    return AssignMachineResult::Success;
 }
 
-bool ConstructionService::releaseMachine(int machineId) {
+ConstructionService::ReleaseMachineResult ConstructionService::releaseMachine(int machineId) {
     auto machine = machineRepository_.findById(machineId);
     if (!machine.has_value()) {
-        return false;
+        return ReleaseMachineResult::MachineNotFound;
+    }
+
+    if (machine->getState() != MachineState::Assigned || machine->getAssignedProjectId() < 0) {
+        return ReleaseMachineResult::MachineNotAssigned;
+
     }
 
     const int projectId = machine->getAssignedProjectId();
-    if (projectId >= 0) {
-        auto assignmentIt = assignmentsByProject_.find(projectId);
-        if (assignmentIt != assignmentsByProject_.end()) {
-            auto& machineIds = assignmentIt->second;
-            machineIds.erase(
-                std::remove(machineIds.begin(), machineIds.end(), machineId),
-                machineIds.end());
+    auto assignmentIt = assignmentsByProject_.find(projectId);
+    if (assignmentIt != assignmentsByProject_.end()) {
+        auto& machineIds = assignmentIt->second;
+        machineIds.erase(
+            std::remove(machineIds.begin(), machineIds.end(), machineId),
+            machineIds.end());
 
-            if (machineIds.empty()) {
-                assignmentsByProject_.erase(assignmentIt);
-            }
+        if (machineIds.empty()) {
+            assignmentsByProject_.erase(assignmentIt);
+
         }
     }
 
     machine->releaseFromProject();
-    return machineRepository_.update(*machine);
+    if (!machineRepository_.update(*machine)) {
+        return ReleaseMachineResult::MachineNotAssigned;
+    }
+
+    return ReleaseMachineResult::Success;
+
 }
 
 std::unordered_map<int, std::vector<int>> ConstructionService::getAssignments() const {

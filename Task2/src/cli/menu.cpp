@@ -69,6 +69,5 @@ void Menu::printHelp() const {
     for (const auto& [_, command] : commands_) {
         output_ << "  - " << command->key() << ": " << command->description() << '\n';
     }
-    output_ << "  - help: show this list\n";
     output_ << "  - exit: terminate the program\n";
 }
