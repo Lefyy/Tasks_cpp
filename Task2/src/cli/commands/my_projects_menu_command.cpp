@@ -69,7 +69,7 @@ void MyProjectsMenuCommand::execute(const std::vector<std::string>&) {
             continue;
         }
 
-        if (command == "resourse") {
+        if (command == "resource") {
             const auto project = context_.projectRepository.findById(projectId);
             if (!project.has_value() || project->isFinished()) {
                 continue;

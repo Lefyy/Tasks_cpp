@@ -10,6 +10,9 @@ MainMenuAction parseMainMenuAction(const std::string& token) {
     if (token == std::to_string(static_cast<int>(MainMenuAction::BuyMachine))) {
         return MainMenuAction::BuyMachine;
     }
+    if (token == std::to_string(static_cast<int>(MainMenuAction::BuyResources))) {
+        return MainMenuAction::BuyResources;
+    }
     if (token == std::to_string(static_cast<int>(MainMenuAction::MyMachines))) {
         return MainMenuAction::MyMachines;
     }

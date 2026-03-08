@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <unordered_map>
+#include <vector>
 
 StatsMenuCommand::StatsMenuCommand(AppContext context)
     : context_(context) {}
@@ -32,6 +33,20 @@ void StatsMenuCommand::execute(const std::vector<std::string>&) {
 
         for (const auto& [machineType, _] : machineCatalog()) {
             std::cout << "  " << toString(machineType) << ": " << machineCounts[machineType] << '\n';
+        }
+
+        const std::vector<ResourceType> resourceOrder = {
+            ResourceType::Concrete,
+            ResourceType::Steel,
+            ResourceType::Wood,
+            ResourceType::Fuel,
+        };
+
+        std::cout << "Ресурсы на складе:\n";
+        for (const ResourceType resourceType : resourceOrder) {
+            std::cout << "  " << toString(resourceType)
+                      << ": " << context_.financeService.stockResources().getAmountOf(resourceType)
+                      << '\n';
         }
 
         std::cout << "Успешно завершено проектов: " << context_.completedProjectIds.size() << '\n'

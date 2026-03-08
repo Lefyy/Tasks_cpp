@@ -3,6 +3,7 @@
 #include "../../headers/app/app_context.h"
 #include "../../headers/cli/command_support.h"
 #include "../../headers/cli/commands/buy_machine_menu_command.h"
+#include "../../headers/cli/commands/buy_resources_menu_command.h"
 #include "../../headers/cli/commands/exit_menu_command.h"
 #include "../../headers/cli/commands/my_machines_menu_command.h"
 #include "../../headers/cli/commands/my_projects_menu_command.h"
@@ -128,6 +129,7 @@ void Application::registerCommands() {
 
     commands_[MainMenuAction::TakeProject] = std::make_shared<TakeProjectMenuCommand>(context);
     commands_[MainMenuAction::BuyMachine] = std::make_shared<BuyMachineMenuCommand>(context);
+    commands_[MainMenuAction::BuyResources] = std::make_shared<BuyResourcesMenuCommand>(context);
     commands_[MainMenuAction::MyMachines] = std::make_shared<MyMachinesMenuCommand>(context);
     commands_[MainMenuAction::MyProjects] = std::make_shared<MyProjectsMenuCommand>(context);
     commands_[MainMenuAction::Stats] = std::make_shared<StatsMenuCommand>(context);
@@ -140,10 +142,11 @@ void Application::printMainMenu() const {
     printSectionHeader("Главное меню");
     std::cout << "[1] Взять проект\n"
               << "[2] Купить технику\n"
-              << "[3] Моя техника\n"
-              << "[4] Мои проекты\n"
-              << "[5] Статистика\n"
-              << "[6] Симулировать неделю\n"
+              << "[3] Купить ресурсы\n"
+              << "[4] Моя техника\n"
+              << "[5] Мои проекты\n"
+              << "[6] Статистика\n"
+              << "[7] Симулировать неделю\n"
               << "[0] Выход\n";
     printSeparator();
     std::cout << "\n";
@@ -163,6 +166,7 @@ void Application::run() {
         switch (action) {
             case MainMenuAction::TakeProject:
             case MainMenuAction::BuyMachine:
+            case MainMenuAction::BuyResources:
             case MainMenuAction::MyMachines:
             case MainMenuAction::MyProjects:
             case MainMenuAction::Stats:

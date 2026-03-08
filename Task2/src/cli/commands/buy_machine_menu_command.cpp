@@ -16,8 +16,8 @@ std::string BuyMachineMenuCommand::description() const {
 }
 
 void BuyMachineMenuCommand::execute(const std::vector<std::string>&) {
-    std::string statusLine = "Введите айди машины, которую хотите купить или напишите b для выхода";
-
+    std::string statusLine = "Введите id машины, которую хотите купить, или back для выхода.";
+    
     const std::vector<MachineType> order = {
         MachineType::Excavator,
         MachineType::Bulldozer,
@@ -44,7 +44,7 @@ void BuyMachineMenuCommand::execute(const std::vector<std::string>&) {
             return;
         }
 
-        if (input == "b") {
+        if (input == "b" || input == "back") {
             return;
         }
 
@@ -59,7 +59,7 @@ void BuyMachineMenuCommand::execute(const std::vector<std::string>&) {
 
         if (!purchased) {
             statusLine = "У вас недостаточно средств для покупки этой машины. "
-                         "Введите айди машины, которую хотите купить или напишите b для выхода";
+                         "Введите id машины, которую хотите купить, или back для выхода.";
             continue;
         }
 
@@ -76,6 +76,6 @@ void BuyMachineMenuCommand::execute(const std::vector<std::string>&) {
             context_.machineRepository.update(*boughtMachine);
         }
 
-        statusLine = "Машина успешно куплена. Введите айди машины, которую хотите купить или напишите b для выхода";
+        statusLine = "Машина успешно куплена. Введите id машины, которую хотите купить, или back для выхода.";
     }
 }
