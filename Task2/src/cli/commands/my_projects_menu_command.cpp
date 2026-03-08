@@ -25,13 +25,14 @@ void MyProjectsMenuCommand::execute(const std::vector<std::string>&) {
             }
         }
 
+        printSeparator();
         printSectionHeader("Команды:");
-        std::cout << "pause <id>    - Поставить проект на паузу\n"
-                  << "continue <id> - Возобновить проект\n"
-                  << "drop <id>     - Бросить проект\n"
-                  << "resourse <id> - Докупить ресурсы для стадии проекта\n"
-                  << "assign <id>   - Назначить машину на проект\n"
-                  << "b             - Выход\n";
+        std::cout << "pause <id>    — Поставить проект на паузу\n"
+                  << "continue <id> — Возобновить проект\n"
+                  << "drop <id>     — Бросить проект\n"
+                  << "resource <id> — Докупить ресурсы для стадии проекта\n"
+                  << "assign <id>   — Назначить машину на проект\n"
+                  << "back          — Выход\n";
         printSeparator();
         std::cout << "\n";
 
@@ -40,7 +41,7 @@ void MyProjectsMenuCommand::execute(const std::vector<std::string>&) {
             return;
         }
 
-        if (line == "b") {
+        if (line == "b" || line == "back") {
             return;
         }
 
@@ -133,13 +134,13 @@ void MyProjectsMenuCommand::execute(const std::vector<std::string>&) {
             printMachineSummary(machine);
         }
 
-        std::cout << "Напишите айди машины, которую хотите назначить на проект или b, чтобы выйти\n";
+        std::cout << "Введите id машины для назначения на проект или back для выхода.\n";
         std::string input;
         if (!std::getline(std::cin, input)) {
             return;
         }
 
-        if (input == "b") {
+        if (input == "b" || input == "back") {
             continue;
         }
 

@@ -16,7 +16,7 @@ std::string TakeProjectMenuCommand::description() const {
 }
 
 void TakeProjectMenuCommand::execute(const std::vector<std::string>&) {
-    std::string statusLine = "Введите айди проекта, который хотите взять или напишите b для выхода";
+    std::string statusLine = "Введите id проекта, который хотите взять, или back для выхода.";
 
     while (true) {
         const auto projects = context_.projectRepository.findAll();
@@ -32,7 +32,7 @@ void TakeProjectMenuCommand::execute(const std::vector<std::string>&) {
             return;
         }
 
-        if (input == "b") {
+        if (input == "b" || input == "back") {
             return;
         }
 
@@ -49,7 +49,8 @@ void TakeProjectMenuCommand::execute(const std::vector<std::string>&) {
             continue;
         }
 
-        statusLine = "Вы взяли проект '" + std::to_string(projectId) +
-                     "', введите айди проекта, который хотите взять или напишите b для выхода.";
+        statusLine = "Проект '" + std::to_string(projectId) +
+                     "' успешно взят. Введите id проекта, который хотите взять, или back для выхода.";
+
     }
 }

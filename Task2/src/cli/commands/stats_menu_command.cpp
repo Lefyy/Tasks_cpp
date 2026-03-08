@@ -37,14 +37,14 @@ void StatsMenuCommand::execute(const std::vector<std::string>&) {
         std::cout << "Успешно завершено проектов: " << context_.completedProjectIds.size() << '\n'
                   << "Брошено проектов: " << context_.droppedProjects << '\n'
                   << "Текущая неделя: " << context_.simulationService.getCurrentWeek() << '\n'
-                  << "Выйти - b\n";
+                  << "Выход: back\n";
 
         std::string input;
         if (!std::getline(std::cin, input)) {
             return;
         }
 
-        if (input == "b") {
+        if (input == "b" || input == "back") {
             return;
         }
     }
