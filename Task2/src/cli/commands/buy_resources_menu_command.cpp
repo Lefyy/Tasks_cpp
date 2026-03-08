@@ -41,13 +41,26 @@ bool parseResourceType(const std::string& token, ResourceType& type) {
     return false;
 }
 
+std::string resourceBuyKey(ResourceType type) {
+    if (type == ResourceType::Concrete) {
+        return "concrete";
+    }
+    if (type == ResourceType::Steel) {
+        return "steel";
+    }
+    if (type == ResourceType::Wood) {
+        return "wood";
+    }
+    return "fuel";
+}
+
 }
 
 BuyResourcesMenuCommand::BuyResourcesMenuCommand(AppContext context)
     : context_(context) {}
 
 std::string BuyResourcesMenuCommand::key() const {
-    return "7";
+    return "3";
 }
 
 std::string BuyResourcesMenuCommand::description() const {
@@ -64,20 +77,22 @@ void BuyResourcesMenuCommand::execute(const std::vector<std::string>&) {
 
     while (true) {
         printSectionHeader("Покупка ресурсов");
-        std::cout << "Прайс и текущий склад:\n";
 
         const auto& prices = resourcePrices();
         const auto& stock = context_.financeService.stockResources();
         for (const ResourceType resourceType : order) {
-            std::cout << "  " << toString(resourceType)
-                      << " | price=" << prices.at(resourceType)
-                      << " | stock=" << stock.getAmountOf(resourceType)
-                      << '\n';
+            printSeparator();
+            printKeyValueRow("Ресурс", toString(resourceType));
+            printKeyValueRow("Цена за 1", std::to_string(prices.at(resourceType)));
+            printKeyValueRow("На складе", std::to_string(stock.getAmountOf(resourceType)));
+            std::cout << "\n";
         }
 
-        std::cout << "Команды:\n"
-                  << "  buy <resource> <amount> - Купить ресурс\n"
-                  << "  back                    - Выход\n";
+        printSeparator();
+        printSectionHeader("Команды:");
+        std::cout << "buy <resource> <amount>  — Купить ресурс\n"
+                  << "back                    — Выход\n";
+        printSeparator();
 
         std::string line;
         if (!std::getline(std::cin, line)) {

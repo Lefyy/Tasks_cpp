@@ -27,17 +27,25 @@ void BuyMachineMenuCommand::execute(const std::vector<std::string>&) {
     };
 
     while (true) {
+        printSectionHeader("Покупка техники");
         for (std::size_t i = 0; i < order.size(); ++i) {
             const MachineType type = order[i];
             const int newPrice = machineCatalog().at(type);
-            std::cout << "id=" << (i + 1)
-                      << " | type=" << toString(type)
-                      << " | condition=New"
-                      << " | price=" << newPrice
-                      << " | used_price=" << (newPrice / 2)
-                      << '\n';
+            printSeparator();
+            printKeyValueRow("ID", std::to_string(i + 1));
+            printKeyValueRow("Тип", toString(type));
+            printKeyValueRow("Состояние", "Новая");
+            printKeyValueRow("Цена покупки", std::to_string(newPrice));
+            printKeyValueRow("Цена продажи", std::to_string(newPrice / 2));
+            std::cout << "\n";
+
         }
 
+        printSeparator();
+        printSectionHeader("Команды:");
+        std::cout << "<id>  — Купить выбранную машину\n"
+                  << "back  — Выход\n";
+        printSeparator();
         std::cout << statusLine << '\n';
         std::string input;
         if (!std::getline(std::cin, input)) {

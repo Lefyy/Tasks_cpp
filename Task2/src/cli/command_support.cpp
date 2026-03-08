@@ -84,9 +84,6 @@ void printSectionHeader(const std::string& title) {
 
 void printKeyValueRow(const std::string& key, const std::string& value) {
     std::cout << "  " << key;
-    if (static_cast<int>(key.size()) < kKeyColumnWidth) {
-        std::cout << std::string(kKeyColumnWidth - static_cast<int>(key.size()), '.');
-    }
     std::cout << ": " << value << "\n";
 }
 
