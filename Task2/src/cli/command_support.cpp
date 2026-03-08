@@ -1,6 +1,50 @@
 #include "../../headers/cli/command_support.h"
 
 #include <iostream>
+#include <sstream>
+
+namespace {
+
+constexpr int kKeyColumnWidth = 18;
+
+std::string formatMachines(const std::unordered_map<MachineType, int>& machines) {
+    if (machines.empty()) {
+        return "нет";
+    }
+
+    std::ostringstream out;
+    bool first = true;
+    for (const auto& [machineType, qty] : machines) {
+        if (!first) {
+            out << ", ";
+        }
+        first = false;
+        out << toString(machineType) << " x" << qty;
+    }
+
+    return out.str();
+}
+
+std::string formatResources(const ResourcePack& resources) {
+    if (resources.values.empty()) {
+        return "нет";
+    }
+
+    std::ostringstream out;
+    bool first = true;
+    for (const auto& [resourceType, amount] : resources.values) {
+        if (!first) {
+            out << ", ";
+        }
+        first = false;
+        out << toString(resourceType) << "=" << amount;
+    }
+
+    return out.str();
+}
+
+}
+
 
 ResourcePack makeResources(std::initializer_list<std::pair<ResourceType, int>> items) {
     ResourcePack pack;
@@ -28,53 +72,48 @@ bool isProjectOwned(const Project& project) {
     return project.getState() != ProjectState::Draft;
 }
 
+void printSeparator() {
+    std::cout << "------------------------------------------------------------\n";
+}
+
+void printSectionHeader(const std::string& title) {
+    printSeparator();
+    std::cout << title << "\n";
+    printSeparator();
+}
+
+void printKeyValueRow(const std::string& key, const std::string& value) {
+    std::cout << "  " << key;
+    if (static_cast<int>(key.size()) < kKeyColumnWidth) {
+        std::cout << std::string(kKeyColumnWidth - static_cast<int>(key.size()), '.');
+    }
+    std::cout << ": " << value << "\n";
+}
+
 void printProjectSummary(const Project& project) {
-    std::cout << "id=" << project.getId() << " | "
-              << "name='" << project.getName() << "' | "
-              << "budget=" << project.getBudget() << " | "
-              << "state=" << toString(project.getState()) << '\n';
+    printSeparator();
+    printKeyValueRow("ID", std::to_string(project.getId()));
+    printKeyValueRow("Название", project.getName());
+    printKeyValueRow("Бюджет", std::to_string(project.getBudget()));
+    printKeyValueRow("Состояние", toString(project.getState()));
 
     if (project.isFinished()) {
-        std::cout << "  Проект завершен\n";
+        printKeyValueRow("Этап", "Проект завершен");
+        std::cout << "\n";
         return;
     }
 
     const auto& phase = project.getCurrentPhase();
     const auto& req = phase.getRequirements();
-    std::cout << "  stage='" << phase.getName() << "' ("
-              << project.getElapsedWeeksInCurrentPhase() << "/" << req.durationWeeks
-              << " недель)\n";
-
-    std::cout << "  machines: ";
-    if (req.machines.empty()) {
-        std::cout << "нет\n";
-    } else {
-        bool first = true;
-        for (const auto& [machineType, qty] : req.machines) {
-            if (!first) {
-                std::cout << ", ";
-            }
-            first = false;
-            std::cout << toString(machineType) << " x" << qty;
-        }
-        std::cout << '\n';
-    }
-
-    std::cout << "  resources/week: ";
-    if (req.resourcesPerWeek.values.empty()) {
-        std::cout << "нет\n";
-        return;
-    }
-
-    bool first = true;
-    for (const auto& [resourceType, amount] : req.resourcesPerWeek.values) {
-        if (!first) {
-            std::cout << ", ";
-        }
-        first = false;
-        std::cout << toString(resourceType) << "=" << amount;
-    }
-    std::cout << '\n';
+    printKeyValueRow("Этап", phase.getName());
+    printKeyValueRow("Прогресс",
+                     std::to_string(project.getElapsedWeeksInCurrentPhase()) +
+                         "/" +
+                         std::to_string(req.durationWeeks) +
+                         " недель");
+    printKeyValueRow("Техника", formatMachines(req.machines));
+    printKeyValueRow("Ресурсы/неделя", formatResources(req.resourcesPerWeek));
+    std::cout << "\n";
 }
 
 int salePriceForMachine(const Machine& machine) {
@@ -85,13 +124,14 @@ int salePriceForMachine(const Machine& machine) {
 }
 
 void printMachineSummary(const Machine& machine) {
-    std::cout << "id=" << machine.getId()
-              << " | type=" << toString(machine.getType())
-              << " | condition=" << toString(machine.getCondition())
-              << " | state=" << toString(machine.getState())
-              << " | project=" << machine.getAssignedProjectId()
-              << " | sale_price=" << salePriceForMachine(machine)
-              << '\n';
+    printSeparator();
+    printKeyValueRow("ID", std::to_string(machine.getId()));
+    printKeyValueRow("Тип", toString(machine.getType()));
+    printKeyValueRow("Состояние", toString(machine.getState()));
+    printKeyValueRow("Износ", toString(machine.getCondition()));
+    printKeyValueRow("Проект", std::to_string(machine.getAssignedProjectId()));
+    printKeyValueRow("Цена продажи", std::to_string(salePriceForMachine(machine)));
+    std::cout << "\n";
 }
 
 int countAssignedByType(const InMemoryMachineRepository& machineRepository,

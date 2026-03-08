@@ -14,6 +14,10 @@ ResourcePack makeResources(std::initializer_list<std::pair<ResourceType, int>> i
 
 bool parseInt(const std::string& value, int& result);
 
+void printSectionHeader(const std::string& title);
+void printSeparator();
+void printKeyValueRow(const std::string& key, const std::string& value);
+
 void printProjectSummary(const Project& project);
 void printMachineSummary(const Machine& machine);
 

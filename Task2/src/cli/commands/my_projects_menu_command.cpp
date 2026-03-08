@@ -25,12 +25,15 @@ void MyProjectsMenuCommand::execute(const std::vector<std::string>&) {
             }
         }
 
-        std::cout << "Поставить проект на паузу - pause <id>\n"
-                  << "Возобновить проект - continue <id>\n"
-                  << "Бросить проект - drop <id>\n"
-                  << "Докупить ресурсы для стадии проекта - resourse <id>\n"
-                  << "Назначить машину на проект - assign <id>\n"
-                  << "Выход - b\n";
+        printSectionHeader("Команды:");
+        std::cout << "pause <id>    - Поставить проект на паузу\n"
+                  << "continue <id> - Возобновить проект\n"
+                  << "drop <id>     - Бросить проект\n"
+                  << "resourse <id> - Докупить ресурсы для стадии проекта\n"
+                  << "assign <id>   - Назначить машину на проект\n"
+                  << "b             - Выход\n";
+        printSeparator();
+        std::cout << "\n";
 
         std::string line;
         if (!std::getline(std::cin, line)) {

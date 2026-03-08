@@ -23,9 +23,12 @@ void MyMachinesMenuCommand::execute(const std::vector<std::string>&) {
             printMachineSummary(machine);
         }
 
-        std::cout << "Продать машину - sell <id>\n"
-                  << "Назначить машину на проект - assign <id>\n"
-                  << "выход - b\n";
+        printSectionHeader("Команды:");
+        std::cout << "sell <id>   - Продать машину\n"
+                  << "assign <id> - Назначить машину на проект\n"
+                  << "b           - Выход\n";
+        printSeparator();
+        std::cout << "\n";
 
         std::string line;
         if (!std::getline(std::cin, line)) {

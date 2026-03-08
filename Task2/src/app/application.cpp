@@ -136,14 +136,17 @@ void Application::registerCommands() {
 }
 
 void Application::printMainMenu() const {
-    std::cout << "1 - Взять проект\n"
-              << "2 - Купить технику\n"
-              << "3 - Моя техника\n"
-              << "4 - Мои проекты\n"
-              << "5 - Статистика\n"
-              << "6 - Симулировать неделю\n"
-              << "0 - Выход\n";
-
+    std::cout << "\n";
+    printSectionHeader("Главное меню");
+    std::cout << "[1] Взять проект\n"
+              << "[2] Купить технику\n"
+              << "[3] Моя техника\n"
+              << "[4] Мои проекты\n"
+              << "[5] Статистика\n"
+              << "[6] Симулировать неделю\n"
+              << "[0] Выход\n";
+    printSeparator();
+    std::cout << "\n";
 }
 
 void Application::run() {
