@@ -6,7 +6,7 @@ SimulationService::SimulationService(ConstructionService& constructionService)
     : constructionService_(constructionService),
       currentWeek_(0) {}
 
-int SimulationService::currentWeek() const noexcept {
+int SimulationService::getCurrentWeek() const noexcept {
     return currentWeek_;
 }
 

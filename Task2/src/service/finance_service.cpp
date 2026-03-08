@@ -1,9 +1,11 @@
 #include "../../headers/service/finance_service.h"
 
 FinanceService::FinanceService(Company& company,
-                               MachineRepository& machineRepository)
+                               MachineRepository& machineRepository,
+                               ProjectRepository& projectRepository)
     : company_(company),
-      machineRepository_(machineRepository) {}
+      machineRepository_(machineRepository),
+      projectRepository_(projectRepository) {}
 
 bool FinanceService::buyMachine(MachineType type,
                                 int price,
@@ -103,4 +105,24 @@ ResourcePack& FinanceService::stockResources() noexcept {
 
 const ResourcePack& FinanceService::stockResources() const noexcept {
     return stockResources_;
+}
+
+bool FinanceService::takeProject(int projectId) {
+    const auto project = projectRepository_.findById(projectId);
+    if (!project.has_value()) {
+        return false;
+    }
+
+    company_.deposit(project->getBudget());
+    return true;
+}
+
+bool FinanceService::dropProject(int projectId) {
+    const auto project = projectRepository_.findById(projectId);
+    if (!project.has_value()) {
+        return false;
+    }
+
+    company_.withdraw(project->getBudget());
+    return true;
 }

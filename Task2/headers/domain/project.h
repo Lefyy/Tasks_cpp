@@ -67,8 +67,8 @@ public:
     bool isFinished() const noexcept;
 
 
-    const ProjectPhase& currentPhase() const;
-    const std::vector<ProjectPhase>& phases() const noexcept;
+    const ProjectPhase& getCurrentPhase() const;
+    const std::vector<ProjectPhase>& getPhases() const noexcept;
 
     void activate();
     void pause();

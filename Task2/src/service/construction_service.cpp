@@ -18,8 +18,7 @@ bool ConstructionService::takeProject(int projectId) {
         return false;
     }
 
-    if (project->getState() != ProjectState::Draft &&
-        project->getState() != ProjectState::Paused) {
+    if (project->getState() != ProjectState::Draft) {
         return false;
     }
 
@@ -34,6 +33,16 @@ bool ConstructionService::pauseProject(int projectId) {
     }
 
     project->pause();
+    return projectRepository_.update(*project);
+}
+
+bool ConstructionService::continueProject(int projectId) {
+    auto project = projectRepository_.findById(projectId);
+    if (!project.has_value() || project->getState() != ProjectState::Paused) {
+        return false;
+    }
+
+    project->activate();
     return projectRepository_.update(*project);
 }
 
@@ -161,7 +170,7 @@ std::vector<int> ConstructionService::advanceWeek() {
 }
 
 bool ConstructionService::hasRequirements(const Project& project) const {
-    const auto& requiredMachines = project.currentPhase().getRequirements().machines;
+    const auto& requiredMachines = project.getCurrentPhase().getRequirements().machines;
 
     std::unordered_map<MachineType, int> assignedByType;
     const auto assignmentIt = assignmentsByProject_.find(project.getId());
@@ -186,11 +195,11 @@ bool ConstructionService::hasRequirements(const Project& project) const {
         }
     }
 
-    return resourceStock_.hasAtLeast(project.currentPhase().getRequirements().resourcesPerWeek);
+    return resourceStock_.hasAtLeast(project.getCurrentPhase().getRequirements().resourcesPerWeek);
 }
 
 bool ConstructionService::consumeWeeklyResources(const Project& project) {
-    const auto& weeklyResources = project.currentPhase().getRequirements().resourcesPerWeek;
+    const auto& weeklyResources = project.getCurrentPhase().getRequirements().resourcesPerWeek;
     if (!resourceStock_.hasAtLeast(weeklyResources)) {
         return false;
     }

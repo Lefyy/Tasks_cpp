@@ -30,6 +30,7 @@ public:
 
     bool takeProject(int projectId);
     bool pauseProject(int projectId);
+    bool continueProject(int projectId);
     bool dropProject(int projectId);
 
     AssignMachineResult assignMachine(int machineId, int projectId);

@@ -125,14 +125,14 @@ bool Project::isFinished() const noexcept {
     return state_ == ProjectState::Completed || currentPhaseIndex_ >= phases_.size();
 }
 
-const ProjectPhase& Project::currentPhase() const {
+const ProjectPhase& Project::getCurrentPhase() const {
     if (currentPhaseIndex_ >= phases_.size()) {
         throw std::out_of_range("No current phase: project is already finished");
     }
     return phases_[currentPhaseIndex_];
 }
 
-const std::vector<ProjectPhase>& Project::phases() const noexcept {
+const std::vector<ProjectPhase>& Project::getPhases() const noexcept {
     return phases_;
 }
 

@@ -14,7 +14,7 @@ class SimulationService {
 public:
     explicit SimulationService(ConstructionService& constructionService);
 
-    int currentWeek() const noexcept;
+    int getCurrentWeek() const noexcept;
     WeekReport simulateNextWeek();
 
 private:
