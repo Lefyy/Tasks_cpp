@@ -1,31 +1,19 @@
 #include "../../headers/app/application.h"
 
-#include "../../headers/cli/commands/assign_machine.h"
-#include "../../headers/cli/commands/buy_machine.h"
-#include "../../headers/cli/commands/next_week.h"
-#include "../../headers/cli/commands/pause_project.h"
-#include "../../headers/cli/commands/release_machine.h"
-#include "../../headers/cli/commands/stats.h"
-#include "../../headers/cli/commands/take_project.h"
+#include "../../headers/app/app_context.h"
+#include "../../headers/cli/command_support.h"
+#include "../../headers/cli/commands/buy_machine_menu_command.h"
+#include "../../headers/cli/commands/exit_menu_command.h"
+#include "../../headers/cli/commands/my_machines_menu_command.h"
+#include "../../headers/cli/commands/my_projects_menu_command.h"
+#include "../../headers/cli/commands/simulate_week_menu_command.h"
+#include "../../headers/cli/commands/stats_menu_command.h"
+#include "../../headers/cli/commands/take_project_menu_command.h"
 
-#include <initializer_list>
 #include <iostream>
-#include <memory>
 #include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
 
 namespace {
-
-ResourcePack makeResources(std::initializer_list<std::pair<ResourceType, int>> items) {
-    ResourcePack pack;
-    for (const auto& [type, amount] : items) {
-        pack.add(type, amount);
-    }
-
-    return pack;
-}
 
 Project makeProject(int id,
                     const std::string& name,
@@ -34,48 +22,22 @@ Project makeProject(int id,
     return Project{id, name, budget, std::move(phases)};
 }
 
-void printProject(const Project& project) {
-    std::cout << "id=" << project.getId()
-              << " name='" << project.getName() << "'"
-              << " state=" << toString(project.getState())
-              << " budget=" << project.getBudget() << '\n';
-}
-
-void printResourcePack(const ResourcePack& pack) {
-    if (pack.values.empty()) {
-        std::cout << "  (none)\n";
-        return;
-    }
-
-    for (const auto& [resourceType, amount] : pack.values) {
-        std::cout << "  - " << toString(resourceType) << ": " << amount << '\n';
-    }
-}
-
 }
 
 Application::Application()
     : company_("Task2 Construction", "Moscow", 2'000'000),
       machineRepository_(),
       projectRepository_(),
-      financeService_(company_, machineRepository_),
+      financeService_(company_, machineRepository_, projectRepository_),
       constructionService_(company_,
                            projectRepository_,
                            machineRepository_,
                            const_cast<ResourcePack&>(financeService_.stockResources())),
-      simulationService_(constructionService_),
-      menu_(std::cin, std::cout) {
+      simulationService_(constructionService_) {
     registerCommands();
 }
 
 void Application::bootstrapDefaults() {
-    const std::unordered_map<ResourceType, int> buyPrices{
-        {ResourceType::Concrete, 100},
-        {ResourceType::Steel, 180},
-        {ResourceType::Wood, 70},
-        {ResourceType::Fuel, 55},
-    };
-
     financeService_.buyResources(
         makeResources({
             {ResourceType::Concrete, 2'500},
@@ -83,14 +45,7 @@ void Application::bootstrapDefaults() {
             {ResourceType::Wood, 1'200},
             {ResourceType::Fuel, 3'000},
         }),
-        buyPrices);
-
-    financeService_.buyMachine(MachineType::Excavator, 450'000, MachineCondition::Used);
-    financeService_.buyMachine(MachineType::Excavator, 470'000, MachineCondition::Used);
-    financeService_.buyMachine(MachineType::Bulldozer, 520'000, MachineCondition::Used);
-    financeService_.buyMachine(MachineType::Crane, 780'000, MachineCondition::Used);
-    financeService_.buyMachine(MachineType::Truck, 210'000, MachineCondition::Used);
-    financeService_.buyMachine(MachineType::ConcreteMixer, 260'000, MachineCondition::Used);
+        resourcePrices());
 
     projectRepository_.add(makeProject(
         1,
@@ -162,15 +117,64 @@ void Application::bootstrapDefaults() {
 }
 
 void Application::registerCommands() {
-    menu_.registerCommand(std::make_shared<NextWeekCommand>(simulationService_, std::cout));
-    menu_.registerCommand(std::make_shared<StatsCommand>(constructionService_, simulationService_, std::cout));
-    menu_.registerCommand(std::make_shared<TakeProjectCommand>(constructionService_, std::cout));
-    menu_.registerCommand(std::make_shared<PauseProjectCommand>(constructionService_, std::cout));
-    menu_.registerCommand(std::make_shared<BuyMachineCommand>(financeService_, std::cout));
-    menu_.registerCommand(std::make_shared<AssignMachineCommand>(constructionService_, std::cout));
-    menu_.registerCommand(std::make_shared<ReleaseMachineCommand>(constructionService_, std::cout));
+    AppContext context{company_,
+                       machineRepository_,
+                       projectRepository_,
+                       financeService_,
+                       constructionService_,
+                       simulationService_,
+                       completedProjectIds_,
+                       droppedProjects_};
+
+    commands_[MainMenuAction::TakeProject] = std::make_shared<TakeProjectMenuCommand>(context);
+    commands_[MainMenuAction::BuyMachine] = std::make_shared<BuyMachineMenuCommand>(context);
+    commands_[MainMenuAction::MyMachines] = std::make_shared<MyMachinesMenuCommand>(context);
+    commands_[MainMenuAction::MyProjects] = std::make_shared<MyProjectsMenuCommand>(context);
+    commands_[MainMenuAction::Stats] = std::make_shared<StatsMenuCommand>(context);
+    commands_[MainMenuAction::SimulateWeek] = std::make_shared<SimulateWeekMenuCommand>(context);
+    commands_[MainMenuAction::Exit] = std::make_shared<ExitMenuCommand>();
+}
+
+void Application::printMainMenu() const {
+    std::cout << "1 - Взять проект\n"
+              << "2 - Купить технику\n"
+              << "3 - Моя техника\n"
+              << "4 - Мои проекты\n"
+              << "5 - Статистика\n"
+              << "6 - Симулировать неделю\n"
+              << "0 - Выход\n";
+
 }
 
 void Application::run() {
-    menu_.run();
+    bool running = true;
+    while (running) {
+        printMainMenu();
+
+        std::string input;
+        if (!std::getline(std::cin, input)) {
+            return;
+        }
+
+        const MainMenuAction action = parseMainMenuAction(input);
+        switch (action) {
+            case MainMenuAction::TakeProject:
+            case MainMenuAction::BuyMachine:
+            case MainMenuAction::MyMachines:
+            case MainMenuAction::MyProjects:
+            case MainMenuAction::Stats:
+            case MainMenuAction::SimulateWeek: {
+                const auto it = commands_.find(action);
+                if (it != commands_.end()) {
+                    it->second->execute({});
+                }
+                break;
+            }
+            case MainMenuAction::Exit:
+                running = false;
+                break;
+            case MainMenuAction::Invalid:
+                break;
+        }
+    }
 }

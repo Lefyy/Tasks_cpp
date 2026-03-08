@@ -1,6 +1,11 @@
 #pragma once
 
-#include "../cli/menu.h"
+#include <memory>
+#include <map>
+#include <unordered_set>
+
+#include "../cli/commands/command.h"
+#include "../cli/main_menu_action.h"
 #include "../domain/company.h"
 #include "../repository/machine_repository.h"
 #include "../repository/project_repository.h"
@@ -17,6 +22,7 @@ public:
 
 private:
     void registerCommands();
+    void printMainMenu() const;
 
     Company company_;
 
@@ -27,5 +33,8 @@ private:
     ConstructionService constructionService_;
     SimulationService simulationService_;
 
-    Menu menu_;
+    std::unordered_set<int> completedProjectIds_;
+    int droppedProjects_{0};
+
+    std::map<MainMenuAction, CommandPtr> commands_;
 };
