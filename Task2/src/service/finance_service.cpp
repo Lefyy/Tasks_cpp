@@ -19,13 +19,13 @@ bool FinanceService::buyEquipment(const EquipmentType& type,
 
     if (std::holds_alternative<MachineType>(type)) {
         Machine machine(nextEquipmentId_++, std::get<MachineType>(type), price);
-        machine.setCondition(condition);
+        machine.setCondition(EquipmentCondition::Used);
         equipmentRepository_.add(machine);
         return true;
     }
 
     Tool tool(nextEquipmentId_++, std::get<ToolType>(type), price);
-    tool.setCondition(condition);
+    tool.setCondition(EquipmentCondition::Used);
     equipmentRepository_.add(tool);
     return true;
 }

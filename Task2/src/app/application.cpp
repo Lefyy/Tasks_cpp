@@ -174,27 +174,12 @@ void Application::run() {
         }
 
         const MainMenuAction action = parseMainMenuAction(input);
-        switch (action) {
-            case MainMenuAction::TakeProject:
-            case MainMenuAction::BuyMachine:
-            case MainMenuAction::BuyTools:
-            case MainMenuAction::BuyResources:
-            case MainMenuAction::MyMachines:
-            case MainMenuAction::MyTools:
-            case MainMenuAction::MyProjects:
-            case MainMenuAction::Stats:
-            case MainMenuAction::SimulateWeek: {
-                const auto it = commands_.find(action);
-                if (it != commands_.end()) {
-                    it->second->execute({});
-                }
-                break;
-            }
-            case MainMenuAction::Exit:
-                running = false;
-                break;
-            case MainMenuAction::Invalid:
-                break;
+        const auto it = commands_.find(action);
+        if (it == commands_.end()) {
+            continue;
         }
+
+        it->second->execute({});
+        running = action != MainMenuAction::Exit;
     }
 }
