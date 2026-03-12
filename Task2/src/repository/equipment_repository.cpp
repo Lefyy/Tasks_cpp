@@ -1,22 +1,5 @@
 #include "../../headers/repository/equipment_repository.h"
 
-namespace {
-std::vector<Equipment> collectAvailableEquipmentByType(
-    const std::unordered_map<int, Equipment>& equipment,
-    EquipmentType type
-) {
-    std::vector<Equipment> result;
-    result.reserve(equipment.size());
-    for (const auto& [id, equip] : equipment) {
-        (void)id;
-        if (equip.getType() == type && equip.getState() == EquipmentState::Available) {
-            result.push_back(equip);
-        }
-    }
-    return result;
-}
-} // namespace
-
 void InMemoryEquipmentRepository::add(const Equipment& equipment) {
     equipment_[equipment.getId()] = equipment.clone();
 }

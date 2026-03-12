@@ -65,6 +65,10 @@ void Machine::releaseFromProject() {
     machineState_ = EquipmentState::Available;
 }
 
+std::unique_ptr<Equipment> Machine::clone() const {
+    return std::make_unique<Machine>(*this);
+}
+
 std::string toString(MachineType type) {
     switch (type) {
         case MachineType::Excavator:

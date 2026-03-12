@@ -44,6 +44,7 @@ public:
     virtual void setCondition(EquipmentCondition newCondition) = 0;
     virtual void setAssignedProjectId(int projectId) = 0;
     virtual void releaseFromProject() = 0;
+    
     virtual std::unique_ptr<Equipment> clone() const = 0;
 };
 

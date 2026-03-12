@@ -16,14 +16,6 @@ EquipmentCategory Tool::getCategory() const {
     return EquipmentCategory::Tool;
 }
 
-int Tool::getId() const {
-    return id_;
-}
-
-EquipmentCategory Tool::getCategory() const {
-    return EquipmentCategory::Tool;
-}
-
 std::string Tool::getDisplayName() const {
     return toString(type_);
 }
@@ -71,6 +63,10 @@ void Tool::setAssignedProjectId(int projectId) {
 void Tool::releaseFromProject() {
     assignedProjectId_ = -1;
     toolState_ = EquipmentState::Available;
+}
+
+std::unique_ptr<Equipment> Tool::clone() const {
+    return std::make_unique<Tool>(*this);
 }
 
 std::string toString(ToolType type) {
