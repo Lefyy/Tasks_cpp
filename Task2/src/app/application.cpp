@@ -4,22 +4,20 @@
 #include "../../headers/cli/command_support.h"
 #include "../../headers/cli/commands/buy_machine_menu_command.h"
 #include "../../headers/cli/commands/buy_resources_menu_command.h"
+#include "../../headers/cli/commands/buy_tools_menu_command.h"
 #include "../../headers/cli/commands/exit_menu_command.h"
 #include "../../headers/cli/commands/my_machines_menu_command.h"
 #include "../../headers/cli/commands/my_projects_menu_command.h"
+#include "../../headers/cli/commands/my_tools_menu_command.h"
 #include "../../headers/cli/commands/simulate_week_menu_command.h"
 #include "../../headers/cli/commands/stats_menu_command.h"
 #include "../../headers/cli/commands/take_project_menu_command.h"
 
 #include <iostream>
-#include <string>
 
 namespace {
 
-Project makeProject(int id,
-                    const std::string& name,
-                    int budget,
-                    std::vector<ProjectPhase> phases) {
+Project makeProject(int id, const std::string& name, int budget, std::vector<ProjectPhase> phases) {
     return Project{id, name, budget, std::move(phases)};
 }
 
@@ -55,16 +53,19 @@ void Application::bootstrapDefaults() {
         {
             ProjectPhase{"Ground preparation",
                          {{{MachineType::Excavator, 1}, {MachineType::Bulldozer, 1}},
+                         {{ToolType::Jackhammer, 1}},
                           makeResources({{ResourceType::Fuel, 120}}),
                           2}},
             ProjectPhase{"Foundation",
                          {{{MachineType::Excavator, 1}, {MachineType::ConcreteMixer, 1}},
+                         {{ToolType::LaserLevel, 1}},
                           makeResources({{ResourceType::Concrete, 260},
                                          {ResourceType::Steel, 40},
                                          {ResourceType::Fuel, 90}}),
                           3}},
             ProjectPhase{"Frame",
                          {{{MachineType::Crane, 1}, {MachineType::Truck, 1}},
+                         {{ToolType::Generator, 1}},
                           makeResources({{ResourceType::Concrete, 140},
                                          {ResourceType::Steel, 110},
                                          {ResourceType::Fuel, 75}}),
@@ -78,16 +79,19 @@ void Application::bootstrapDefaults() {
         {
             ProjectPhase{"Site clearing",
                          {{{MachineType::Bulldozer, 1}},
+                         {{ToolType::Jackhammer, 1}},
                           makeResources({{ResourceType::Fuel, 80}}),
                           2}},
             ProjectPhase{"Base slab",
                          {{{MachineType::ConcreteMixer, 1}, {MachineType::Truck, 1}},
+                         {{ToolType::LaserLevel, 1}},
                           makeResources({{ResourceType::Concrete, 210},
                                          {ResourceType::Steel, 30},
                                          {ResourceType::Fuel, 70}}),
                           3}},
             ProjectPhase{"Assembly",
                          {{{MachineType::Crane, 1}},
+                         {{ToolType::Generator, 1}},
                           makeResources({{ResourceType::Steel, 160},
                                          {ResourceType::Wood, 90},
                                          {ResourceType::Fuel, 60}}),
@@ -101,15 +105,18 @@ void Application::bootstrapDefaults() {
         {
             ProjectPhase{"Earthwork",
                          {{{MachineType::Excavator, 1}, {MachineType::Truck, 1}},
+                         {{ToolType::Jackhammer, 1}},
                           makeResources({{ResourceType::Fuel, 130}}),
                           2}},
             ProjectPhase{"Subgrade",
                          {{{MachineType::Bulldozer, 1}},
+                         {{ToolType::LaserLevel, 1}},
                           makeResources({{ResourceType::Concrete, 80},
                                          {ResourceType::Fuel, 90}}),
                           2}},
             ProjectPhase{"Surfacing",
                          {{{MachineType::ConcreteMixer, 1}},
+                         {{ToolType::Generator, 1}},
                           makeResources({{ResourceType::Concrete, 170},
                                          {ResourceType::Steel, 20},
                                          {ResourceType::Fuel, 80}}),
@@ -129,8 +136,10 @@ void Application::registerCommands() {
 
     commands_[MainMenuAction::TakeProject] = std::make_shared<TakeProjectMenuCommand>(context);
     commands_[MainMenuAction::BuyMachine] = std::make_shared<BuyMachineMenuCommand>(context);
+    commands_[MainMenuAction::BuyTools] = std::make_shared<BuyToolsMenuCommand>(context);
     commands_[MainMenuAction::BuyResources] = std::make_shared<BuyResourcesMenuCommand>(context);
     commands_[MainMenuAction::MyMachines] = std::make_shared<MyMachinesMenuCommand>(context);
+    commands_[MainMenuAction::MyTools] = std::make_shared<MyToolsMenuCommand>(context);
     commands_[MainMenuAction::MyProjects] = std::make_shared<MyProjectsMenuCommand>(context);
     commands_[MainMenuAction::Stats] = std::make_shared<StatsMenuCommand>(context);
     commands_[MainMenuAction::SimulateWeek] = std::make_shared<SimulateWeekMenuCommand>(context);
@@ -141,12 +150,14 @@ void Application::printMainMenu() const {
     std::cout << "\n";
     printSectionHeader("Главное меню");
     std::cout << "[1] Взять проект\n"
-              << "[2] Купить технику\n"
-              << "[3] Купить ресурсы\n"
-              << "[4] Моя техника\n"
-              << "[5] Мои проекты\n"
-              << "[6] Статистика\n"
-              << "[7] Симулировать неделю\n"
+              << "[2] Купить машины\n"
+              << "[3] Купить инструменты\n"
+              << "[4] Купить ресурсы\n"
+              << "[5] Мои машины\n"
+              << "[6] Мои инструменты\n"
+              << "[7] Мои проекты\n"
+              << "[8] Статистика\n"
+              << "[9] Симулировать неделю\n"
               << "[0] Выход\n";
     printSeparator();
     std::cout << "\n";
@@ -166,8 +177,10 @@ void Application::run() {
         switch (action) {
             case MainMenuAction::TakeProject:
             case MainMenuAction::BuyMachine:
+            case MainMenuAction::BuyTools:
             case MainMenuAction::BuyResources:
             case MainMenuAction::MyMachines:
+            case MainMenuAction::MyTools:
             case MainMenuAction::MyProjects:
             case MainMenuAction::Stats:
             case MainMenuAction::SimulateWeek: {

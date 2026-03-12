@@ -6,11 +6,13 @@ enum class MainMenuAction {
     Exit = 0,
     TakeProject = 1,
     BuyMachine = 2,
-    BuyResources = 3,
-    MyMachines = 4,
-    MyProjects = 5,
-    Stats = 6,
-    SimulateWeek = 7,
+    BuyTools = 3,
+    BuyResources = 4,
+    MyMachines = 5,
+    MyTools = 6,
+    MyProjects = 7,
+    Stats = 8,
+    SimulateWeek = 9,
     Invalid = -1,
 };
 

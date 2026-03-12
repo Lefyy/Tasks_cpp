@@ -11,7 +11,7 @@ public:
                    EquipmentRepository& equipmentRepository,
                    ProjectRepository& projectRepository);
 
-    bool buyEquipment(EquipmentType type,
+    bool buyEquipment(const EquipmentType& type,
                       int price,
                       EquipmentCondition condition = EquipmentCondition::New);
 

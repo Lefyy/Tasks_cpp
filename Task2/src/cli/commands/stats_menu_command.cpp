@@ -10,7 +10,7 @@ StatsMenuCommand::StatsMenuCommand(AppContext context)
     : context_(context) {}
 
 std::string StatsMenuCommand::key() const {
-    return "5";
+    return "8";
 }
 
 std::string StatsMenuCommand::description() const {
@@ -20,8 +20,15 @@ std::string StatsMenuCommand::description() const {
 void StatsMenuCommand::execute(const std::vector<std::string>&) {
     while (true) {
         std::unordered_map<MachineType, int> machineCounts;
-        for (const auto& machine : context_.machineRepository.findAll()) {
-            ++machineCounts[machine.getType()];
+        std::unordered_map<ToolType, int> toolCounts;
+
+        for (const Equipment* equipment : context_.equipmentRepository.findAll()) {
+            const EquipmentType type = equipment->getType();
+            if (std::holds_alternative<MachineType>(type)) {
+                ++machineCounts[std::get<MachineType>(type)];
+            } else {
+                ++toolCounts[std::get<ToolType>(type)];
+            }
         }
 
         std::cout << "Компания: " << context_.company.getName() << '\n'
@@ -29,10 +36,15 @@ void StatsMenuCommand::execute(const std::vector<std::string>&) {
                   << "Количество проектов: "
                   << (context_.projectRepository.findAll().size() - context_.projectRepository.findDraft().size())
                   << '\n'
-                  << "Техника:\n";
+                  << "Машины:\n";
 
         for (const auto& [machineType, _] : machineCatalog()) {
             std::cout << "  " << toString(machineType) << ": " << machineCounts[machineType] << '\n';
+        }
+
+        std::cout << "Инструменты:\n";
+        for (const auto& [toolType, _] : toolCatalog()) {
+            std::cout << "  " << toString(toolType) << ": " << toolCounts[toolType] << '\n';
         }
 
         const std::vector<ResourceType> resourceOrder = {

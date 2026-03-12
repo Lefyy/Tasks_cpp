@@ -9,7 +9,7 @@ MyProjectsMenuCommand::MyProjectsMenuCommand(AppContext context)
     : context_(context) {}
 
 std::string MyProjectsMenuCommand::key() const {
-    return "4";
+    return "7";
 }
 
 std::string MyProjectsMenuCommand::description() const {
@@ -31,7 +31,7 @@ void MyProjectsMenuCommand::execute(const std::vector<std::string>&) {
                   << "continue <id> — Возобновить проект\n"
                   << "drop <id>     — Бросить проект\n"
                   << "resource <id> — Докупить ресурсы для стадии проекта\n"
-                  << "assign <id>   — Назначить машину на проект\n"
+                  << "assign <id>   — Назначить оборудование на проект\n"
                   << "back          — Выход\n";
         printSeparator();
         std::cout << "\n";
@@ -105,33 +105,47 @@ void MyProjectsMenuCommand::execute(const std::vector<std::string>&) {
             continue;
         }
 
-        const auto& required = project->getCurrentPhase().getRequirements().machines;
+        const auto& req = project->getCurrentPhase().getRequirements();
         const auto assignments = context_.constructionService.getAssignments();
-        std::vector<Equipment> candidateEquipment;
+        bool hasCandidates = false;
 
-        for (const auto& equipment : context_.equipmentRepository.findAll()) {
-            if (equipment.getState() != EquipmentState::Available) {
+        for (const Equipment* equipment : context_.equipmentRepository.findAll()) {
+            if (equipment->getState() != EquipmentState::Available) {
                 continue;
             }
 
-            const auto reqIt = required.find(equipment.getType());
-            if (reqIt == required.end()) {
-                continue;
+            const EquipmentType type = equipment->getType();
+            int requiredCount = 0;
+            if (std::holds_alternative<MachineType>(type)) {
+                const auto reqIt = req.machines.find(std::get<MachineType>(type));
+                if (reqIt == req.machines.end()) {
+                    continue;
+                }
+                requiredCount = reqIt->second;
+            } else {
+                const auto reqIt = req.tools.find(std::get<ToolType>(type));
+                if (reqIt == req.tools.end()) {
+                    continue;
+                }
+                requiredCount = reqIt->second;
+
             }
 
             const int assignedCount = countAssignedByType(context_.equipmentRepository,
                                                           assignments,
                                                           projectId,
-                                                          equipment.getType());
-            if (assignedCount >= reqIt->second) {
+                                                          type);
+            if (assignedCount >= requiredCount) {
                 continue;
             }
 
-            candidateEquipment.push_back(equipment);
+            hasCandidates = true;
+            printEquipmentSummary(*equipment);
         }
 
-        for (const auto& equipment : candidateEquipment) {
-            printEquipmentSummary(equipment);
+        if (!hasCandidates) {
+            std::cout << "Подходящего свободного оборудования нет\n";
+            continue;
         }
 
         std::cout << "Введите id оборудования для назначения на проект или back для выхода.\n";

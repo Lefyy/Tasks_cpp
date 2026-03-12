@@ -1,4 +1,6 @@
 #include "../../headers/domain/equipment.h"
+#include "../../headers/domain/machine.h"
+#include "../../headers/domain/tool.h"
 
 std::string toString(EquipmentCategory category) {
     switch (category) {
@@ -34,3 +36,12 @@ std::string toString(EquipmentState state) {
 
     return "Unknown EquipmentState";
 }
+
+std::string toString(const EquipmentType& type) {
+    return std::visit([](const auto& value) { return toString(value); }, type);
+}
+
+EquipmentCategory categoryOf(const EquipmentType& type) {
+    return std::holds_alternative<MachineType>(type) ? EquipmentCategory::Machine : EquipmentCategory::Tool;
+}
+

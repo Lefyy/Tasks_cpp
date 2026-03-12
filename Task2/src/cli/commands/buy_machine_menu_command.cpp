@@ -12,7 +12,7 @@ std::string BuyMachineMenuCommand::key() const {
 }
 
 std::string BuyMachineMenuCommand::description() const {
-    return "Купить технику";
+    return "Купить машину";
 }
 
 void BuyMachineMenuCommand::execute(const std::vector<std::string>&) {
@@ -27,7 +27,7 @@ void BuyMachineMenuCommand::execute(const std::vector<std::string>&) {
     };
 
     while (true) {
-        printSectionHeader("Покупка техники");
+        printSectionHeader("Покупка машин");
         for (std::size_t i = 0; i < order.size(); ++i) {
             const MachineType type = order[i];
             const int newPrice = machineCatalog().at(type);
@@ -63,25 +63,12 @@ void BuyMachineMenuCommand::execute(const std::vector<std::string>&) {
 
         const MachineType type = order[static_cast<std::size_t>(selected - 1)];
         const int price = machineCatalog().at(type);
-        const bool purchased = context_.financeService.buyMachine(type, price, MachineCondition::New);
+        const bool purchased = context_.financeService.buyEquipment(type, price, EquipmentCondition::New);
 
         if (!purchased) {
             statusLine = "У вас недостаточно средств для покупки этой машины. "
                          "Введите id машины, которую хотите купить, или back для выхода.";
             continue;
-        }
-
-        int newestId = -1;
-        for (const auto& machine : context_.machineRepository.findAll()) {
-            if (machine.getId() > newestId) {
-                newestId = machine.getId();
-            }
-        }
-
-        auto boughtMachine = context_.machineRepository.findById(newestId);
-        if (boughtMachine.has_value()) {
-            boughtMachine->setCondition(MachineCondition::Used);
-            context_.machineRepository.update(*boughtMachine);
         }
 
         statusLine = "Машина успешно куплена. Введите id машины, которую хотите купить, или back для выхода.";

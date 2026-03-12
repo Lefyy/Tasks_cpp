@@ -1,41 +1,40 @@
-#include "../../../headers/cli/commands/my_machines_menu_command.h"
+#include "../../../headers/cli/commands/my_tools_menu_command.h"
 
 #include "../../../headers/cli/command_support.h"
 
 #include <iostream>
 #include <sstream>
 
-MyMachinesMenuCommand::MyMachinesMenuCommand(AppContext context)
+MyToolsMenuCommand::MyToolsMenuCommand(AppContext context)
     : context_(context) {}
 
-std::string MyMachinesMenuCommand::key() const {
-    return "5";
+std::string MyToolsMenuCommand::key() const {
+    return "6";
 }
 
-std::string MyMachinesMenuCommand::description() const {
-    return "Мои машины";
+std::string MyToolsMenuCommand::description() const {
+    return "Мои инструменты";
 }
 
-void MyMachinesMenuCommand::execute(const std::vector<std::string>&) {
+void MyToolsMenuCommand::execute(const std::vector<std::string>&) {
     while (true) {
-        bool hasMachines = false;
+        bool hasTools = false;
         for (const Equipment* equipment : context_.equipmentRepository.findAll()) {
-            if (equipment->getCategory() != EquipmentCategory::Machine) {
+            if (equipment->getCategory() != EquipmentCategory::Tool) {
                 continue;
             }
 
-            hasMachines = true;
+            hasTools = true;
             printEquipmentSummary(*equipment);
         }
 
-        if (!hasMachines) {
-            std::cout << "У вас пока нет машин\n";
-
+        if (!hasTools) {
+            std::cout << "У вас пока нет инструментов\n";
         }
 
         printSeparator();
         printSectionHeader("Команды:");
-        std::cout << "sell <id>   — Продать машину\n"
+        std::cout << "sell <id>   — Продать инструмент\n"
                   << "assign <id> — Назначить на проект\n"
                   << "back        — Выход\n";
         printSeparator();
@@ -56,19 +55,17 @@ void MyMachinesMenuCommand::execute(const std::vector<std::string>&) {
         stream >> command >> equipmentId;
 
         Equipment* equipment = context_.equipmentRepository.findById(equipmentId);
-        if (equipment == nullptr || equipment->getCategory() != EquipmentCategory::Machine) {
+        if (equipment == nullptr || equipment->getCategory() != EquipmentCategory::Tool) {
             continue;
         }
-
 
         if (command == "sell") {
             if (equipment->getState() == EquipmentState::Assigned) {
                 context_.constructionService.releaseEquipment(equipmentId);
-
             }
 
             if (context_.financeService.sellEquipment(equipmentId, salePriceForEquipment(*equipment))) {
-                std::cout << "Вы успешно продали машину\n";
+                std::cout << "Вы успешно продали инструмент\n";
             }
             continue;
         }
@@ -84,23 +81,23 @@ void MyMachinesMenuCommand::execute(const std::vector<std::string>&) {
         std::vector<Project> suitableProjects;
         const auto projects = context_.projectRepository.findAll();
         const auto assignments = context_.constructionService.getAssignments();
-        const auto machineType = std::get<MachineType>(equipment->getType());
+        const auto toolType = std::get<ToolType>(equipment->getType());
 
         for (const auto& project : projects) {
             if (!isProjectOwned(project) || project.isFinished() || project.getState() == ProjectState::Cancelled) {
                 continue;
             }
 
-            const auto& reqMachines = project.getCurrentPhase().getRequirements().machines;
-            const auto reqIt = reqMachines.find(machineType);
-            if (reqIt == reqMachines.end()) {
+            const auto& reqTools = project.getCurrentPhase().getRequirements().tools;
+            const auto reqIt = reqTools.find(toolType);
+            if (reqIt == reqTools.end()) {
                 continue;
             }
 
             const int assignedCount = countAssignedByType(context_.equipmentRepository,
                                                           assignments,
                                                           project.getId(),
-                                                          machineType);
+                                                          toolType);
             if (assignedCount >= reqIt->second) {
                 continue;
             }
@@ -109,7 +106,7 @@ void MyMachinesMenuCommand::execute(const std::vector<std::string>&) {
         }
 
         if (suitableProjects.empty()) {
-            std::cout << "Такая машина пока не требуется ни на одном проекте. Введите back для выхода.\n";
+            std::cout << "Такой инструмент пока не требуется ни на одном проекте. Введите back для выхода.\n";
             std::string back;
             while (std::getline(std::cin, back)) {
                 if (back == "b" || back == "back") {
@@ -123,7 +120,7 @@ void MyMachinesMenuCommand::execute(const std::vector<std::string>&) {
             printProjectSummary(project);
         }
 
-        std::cout << "Введите id проекта для назначения машины или back для выхода.\n";
+        std::cout << "Введите id проекта для назначения инструмента или back для выхода.\n";
         std::string input;
         if (!std::getline(std::cin, input)) {
             return;

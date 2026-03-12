@@ -24,7 +24,11 @@ bool Machine::isOperational() const {
     return machineState_ != EquipmentState::Maintenance;
 }
 
-MachineType Machine::getType() const {
+EquipmentType Machine::getType() const {
+    return type_;
+}
+
+MachineType Machine::getMachineType() const {
     return type_;
 }
 

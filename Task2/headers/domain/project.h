@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "machine.h"
+#include "tool.h"
 
 enum class ResourceType {
     Concrete,
@@ -32,6 +33,7 @@ enum class ProjectState {
 
 struct PhaseRequirements {
     std::unordered_map<MachineType, int> machines;
+    std::unordered_map<ToolType, int> tools;
     ResourcePack resourcesPerWeek;
     int durationWeeks{};
 };

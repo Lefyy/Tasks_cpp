@@ -1,5 +1,8 @@
 #include "../../headers/service/finance_service.h"
 
+#include "../../headers/domain/machine.h"
+#include "../../headers/domain/tool.h"
+
 FinanceService::FinanceService(Company& company,
                                EquipmentRepository& equipmentRepository,
                                ProjectRepository& projectRepository)
@@ -7,20 +10,23 @@ FinanceService::FinanceService(Company& company,
       equipmentRepository_(equipmentRepository),
       projectRepository_(projectRepository) {}
 
-bool FinanceService::buyEquipment(EquipmentType type,
-                                   int price,
-                                   EquipmentCondition condition) {
-    if (price < 0) {
+bool FinanceService::buyEquipment(const EquipmentType& type,
+                                  int price,
+                                  EquipmentCondition condition) {
+    if (price < 0 || !company_.withdraw(price)) {
         return false;
     }
 
-    if (!company_.withdraw(price)) {
-        return false;
+    if (std::holds_alternative<MachineType>(type)) {
+        Machine machine(nextEquipmentId_++, std::get<MachineType>(type), price);
+        machine.setCondition(condition);
+        equipmentRepository_.add(machine);
+        return true;
     }
 
-    Equipment equipment(nextEquipmentId_++, type, price);
-    equipment.setCondition(condition);
-    equipmentRepository_.add(equipment);
+    Tool tool(nextEquipmentId_++, std::get<ToolType>(type), price);
+    tool.setCondition(condition);
+    equipmentRepository_.add(tool);
     return true;
 }
 
@@ -29,8 +35,8 @@ bool FinanceService::sellEquipment(int equipmentId, int salePrice) {
         return false;
     }
 
-    const auto equipment = equipmentRepository_.findById(equipmentId);
-    if (!equipment.has_value()) {
+    const Equipment* equipment = equipmentRepository_.findById(equipmentId);
+    if (equipment == nullptr) {
         return false;
     }
 
@@ -99,13 +105,9 @@ bool FinanceService::sellResources(const ResourcePack& resources,
     return true;
 }
 
-ResourcePack& FinanceService::stockResources() noexcept {
-    return stockResources_;
-}
+ResourcePack& FinanceService::stockResources() noexcept { return stockResources_; }
+const ResourcePack& FinanceService::stockResources() const noexcept { return stockResources_; }
 
-const ResourcePack& FinanceService::stockResources() const noexcept {
-    return stockResources_;
-}
 
 bool FinanceService::takeProject(int projectId) {
     const auto project = projectRepository_.findById(projectId);
@@ -123,6 +125,5 @@ bool FinanceService::dropProject(int projectId) {
         return false;
     }
 
-    company_.withdraw(project->getBudget());
-    return true;
+    return company_.withdraw(project->getBudget());
 }

@@ -32,7 +32,11 @@ bool Tool::isOperational() const {
     return toolState_ != EquipmentState::Maintenance;
 }
 
-ToolType Tool::getType() const {
+EquipmentType Tool::getType() const {
+    return type_;
+}
+
+ToolType Tool::getToolType() const {
     return type_;
 }
 

@@ -5,8 +5,6 @@
 
 namespace {
 
-constexpr int kKeyColumnWidth = 18;
-
 std::string formatMachines(const std::unordered_map<MachineType, int>& machines) {
     if (machines.empty()) {
         return "нет";
@@ -24,6 +22,25 @@ std::string formatMachines(const std::unordered_map<MachineType, int>& machines)
 
     return out.str();
 }
+
+std::string formatTools(const std::unordered_map<ToolType, int>& tools) {
+    if (tools.empty()) {
+        return "нет";
+    }
+
+    std::ostringstream out;
+    bool first = true;
+    for (const auto& [toolType, qty] : tools) {
+        if (!first) {
+            out << ", ";
+        }
+        first = false;
+        out << toString(toolType) << " x" << qty;
+    }
+
+    return out.str();
+}
+
 
 std::string formatResources(const ResourcePack& resources) {
     if (resources.values.empty()) {
@@ -108,7 +125,8 @@ void printProjectSummary(const Project& project) {
                          "/" +
                          std::to_string(req.durationWeeks) +
                          " недель");
-    printKeyValueRow("Техника", formatMachines(req.machines));
+    printKeyValueRow("Машины", formatMachines(req.machines));
+    printKeyValueRow("Инструменты", formatTools(req.tools));
     printKeyValueRow("Ресурсы/неделя", formatResources(req.resourcesPerWeek));
     std::cout << "\n";
 }
@@ -123,6 +141,7 @@ int salePriceForEquipment(const Equipment& equipment) {
 void printEquipmentSummary(const Equipment& equipment) {
     printSeparator();
     printKeyValueRow("ID", std::to_string(equipment.getId()));
+    printKeyValueRow("Категория", toString(equipment.getCategory()));
     printKeyValueRow("Тип", toString(equipment.getType()));
     printKeyValueRow("Состояние", toString(equipment.getState()));
     printKeyValueRow("Износ", toString(equipment.getCondition()));
@@ -134,7 +153,7 @@ void printEquipmentSummary(const Equipment& equipment) {
 int countAssignedByType(const InMemoryEquipmentRepository& equipmentRepository,
                         const std::unordered_map<int, std::vector<int>>& assignments,
                         int projectId,
-                        EquipmentType type) {
+                        const EquipmentType& type) {
     int assigned = 0;
     const auto projectIt = assignments.find(projectId);
     if (projectIt == assignments.end()) {
@@ -142,8 +161,8 @@ int countAssignedByType(const InMemoryEquipmentRepository& equipmentRepository,
     }
 
     for (const int equipmentId : projectIt->second) {
-        const auto equipment = equipmentRepository.findById(equipmentId);
-        if (!equipment.has_value()) {
+        const Equipment* equipment = equipmentRepository.findById(equipmentId);
+        if (equipment == nullptr) {
             continue;
         }
 
@@ -164,6 +183,16 @@ const std::unordered_map<MachineType, int>& machineCatalog() {
         {MachineType::Crane, 1'560'000},
         {MachineType::Truck, 420'000},
         {MachineType::ConcreteMixer, 520'000},
+    };
+
+    return catalog;
+}
+
+const std::unordered_map<ToolType, int>& toolCatalog() {
+    static const std::unordered_map<ToolType, int> catalog{
+        {ToolType::Jackhammer, 120'000},
+        {ToolType::Generator, 175'000},
+        {ToolType::LaserLevel, 85'000},
     };
 
     return catalog;

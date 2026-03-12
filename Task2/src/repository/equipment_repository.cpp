@@ -18,40 +18,53 @@ std::vector<Equipment> collectAvailableEquipmentByType(
 } // namespace
 
 void InMemoryEquipmentRepository::add(const Equipment& equipment) {
-    equipment_.insert_or_assign(equipment.getId(), equipment);
+    equipment_[equipment.getId()] = equipment.clone();
 }
 
 bool InMemoryEquipmentRepository::remove(int equipmentId) {
     return equipment_.erase(equipmentId) > 0;
 }
 
-std::optional<Equipment> InMemoryEquipmentRepository::findById(int equipmentId) const {
+Equipment* InMemoryEquipmentRepository::findById(int equipmentId) {
     const auto it = equipment_.find(equipmentId);
-    if (it == equipment_.end()) {
-        return std::nullopt;
-    }
-    return it->second;
+    return it == equipment_.end() ? nullptr : it->second.get();
 }
 
-std::vector<Equipment> InMemoryEquipmentRepository::findAll() const {
-    std::vector<Equipment> result;
+const Equipment* InMemoryEquipmentRepository::findById(int equipmentId) const {
+    const auto it = equipment_.find(equipmentId);
+    return it == equipment_.end() ? nullptr : it->second.get();
+}
+
+std::vector<const Equipment*> InMemoryEquipmentRepository::findAll() const {
+    std::vector<const Equipment*> result;
     result.reserve(equipment_.size());
-    for (const auto& [id, equip] : equipment_) {
+    for (const auto& [id, equipment] : equipment_) {
         (void)id;
-        result.push_back(equip);
+        result.push_back(equipment.get());
     }
     return result;
 }
 
-std::vector<Equipment> InMemoryEquipmentRepository::findAvailableByType(EquipmentType type) const {
-    return collectAvailableEquipmentByType(equipment_, type);
+std::vector<const Equipment*> InMemoryEquipmentRepository::findAvailableByCategory(EquipmentCategory category) const {
+    std::vector<const Equipment*> result;
+    for (const auto& [id, equipment] : equipment_) {
+        (void)id;
+        if (equipment->getCategory() == category && equipment->getState() == EquipmentState::Available) {
+            result.push_back(equipment.get());
+        }
+    }
+    return result;
+
 }
 
-bool InMemoryEquipmentRepository::update(const Equipment& equipment) {
-    const auto it = equipment_.find(equipment.getId());
-    if (it == equipment_.end()) {
-        return false;
+std::vector<const Equipment*> InMemoryEquipmentRepository::findAllByType(const EquipmentType& type) const {
+    std::vector<const Equipment*> result;
+    for (const auto& [id, equipment] : equipment_) {
+        (void)id;
+        if (equipment->getType() == type) {
+            result.push_back(equipment.get());
+        }
+
     }
-    it->second = equipment;
-    return true;
+    return result;
 }

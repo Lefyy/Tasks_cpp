@@ -19,16 +19,18 @@ public:
     std::string getDisplayName() const override;
     bool isOperational() const override;
 
-    ToolType getType() const;
-    int getPrice() const;
-    EquipmentState getState() const;
-    EquipmentCondition getCondition() const;
-    int getAssignedProjectId() const;
+    EquipmentType getType() const override;
+    ToolType getToolType() const;
+    int getPrice() const override;
+    EquipmentState getState() const override;
+    EquipmentCondition getCondition() const override;
+    int getAssignedProjectId() const override;
 
-    void setState(EquipmentState newState);
-    void setCondition(EquipmentCondition newCondition);
-    void setAssignedProjectId(int projectId);
-    void releaseFromProject();
+    void setState(EquipmentState newState) override;
+    void setCondition(EquipmentCondition newCondition) override;
+    void setAssignedProjectId(int projectId) override;
+    void releaseFromProject() override;
+    std::unique_ptr<Equipment> clone() const override;
 
 private:
     int id_;
@@ -40,5 +42,3 @@ private:
 };
 
 std::string toString(ToolType type);
-std::string toString(EquipmentCondition condition);
-std::string toString(EquipmentState state);
