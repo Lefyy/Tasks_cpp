@@ -3,7 +3,7 @@
 #include <unordered_set>
 
 #include "../domain/company.h"
-#include "../repository/machine_repository.h"
+#include "../repository/equipment_repository.h"
 #include "../repository/project_repository.h"
 #include "../service/construction_service.h"
 #include "../service/finance_service.h"
@@ -11,7 +11,7 @@
 
 struct AppContext {
     Company& company;
-    InMemoryMachineRepository& machineRepository;
+    InMemoryEquipmentRepository& equipmentRepository;
     InMemoryProjectRepository& projectRepository;
     FinanceService& financeService;
     ConstructionService& constructionService;

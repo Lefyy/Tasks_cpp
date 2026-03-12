@@ -4,24 +4,22 @@
 
 #include "equipment.h"
 
-enum class MachineType {
-    Excavator,
-    Bulldozer,
-    Crane,
-    Truck,
-    ConcreteMixer
+enum class ToolType {
+    Jackhammer,
+    Generator,
+    LaserLevel,
 };
 
-class Machine final : public Equipment {
+class Tool final : public Equipment {
 public:
-    Machine(int id, MachineType type, int purchasePrice);
+    Tool(int id, ToolType type, int purchasePrice);
 
     int getId() const override;
     EquipmentCategory getCategory() const override;
     std::string getDisplayName() const override;
     bool isOperational() const override;
 
-    MachineType getType() const;
+    ToolType getType() const;
     int getPrice() const;
     EquipmentState getState() const;
     EquipmentCondition getCondition() const;
@@ -34,14 +32,13 @@ public:
 
 private:
     int id_;
-    MachineType type_;
+    ToolType type_;
     int price_;
-    EquipmentState machineState_;
-    EquipmentCondition machineCondition_;
+    EquipmentState toolState_;
+    EquipmentCondition toolCondition_;
     int assignedProjectId_;
 };
 
-std::string toString(MachineType type);
+std::string toString(ToolType type);
 std::string toString(EquipmentCondition condition);
 std::string toString(EquipmentState state);
-

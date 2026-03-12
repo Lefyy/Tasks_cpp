@@ -4,12 +4,24 @@ Machine::Machine(int id, MachineType type, int purchasePrice)
     : id_(id),
       type_(type),
       price_(purchasePrice),
-      machineState_(MachineState::Available),
-      machineCondition_(MachineCondition::New),
+      machineState_(EquipmentState::Available),
+      machineCondition_(EquipmentCondition::New),
       assignedProjectId_(-1) {}
 
 int Machine::getId() const {
     return id_;
+}
+
+EquipmentCategory Machine::getCategory() const {
+    return EquipmentCategory::Machine;
+}
+
+std::string Machine::getDisplayName() const {
+    return toString(type_);
+}
+
+bool Machine::isOperational() const {
+    return machineState_ != EquipmentState::Maintenance;
 }
 
 MachineType Machine::getType() const {
@@ -20,11 +32,11 @@ int Machine::getPrice() const {
     return price_;
 }
 
-MachineState Machine::getState() const {
+EquipmentState Machine::getState() const {
     return machineState_;
 }
 
-MachineCondition Machine::getCondition() const {
+EquipmentCondition Machine::getCondition() const {
     return machineCondition_;
 }
 
@@ -32,11 +44,11 @@ int Machine::getAssignedProjectId() const {
     return assignedProjectId_;
 }
 
-void Machine::setState(MachineState newState) {
+void Machine::setState(EquipmentState newState) {
     machineState_ = newState;
 }
 
-void Machine::setCondition(MachineCondition newCondition) {
+void Machine::setCondition(EquipmentCondition newCondition) {
     machineCondition_ = newCondition;
 }
 
@@ -46,7 +58,7 @@ void Machine::setAssignedProjectId(int projectId) {
 
 void Machine::releaseFromProject() {
     assignedProjectId_ = -1;
-    machineState_ = MachineState::Available;
+    machineState_ = EquipmentState::Available;
 }
 
 std::string toString(MachineType type) {
@@ -64,28 +76,4 @@ std::string toString(MachineType type) {
     }
 
     return "Unknown MachineType";
-}
-
-std::string toString(MachineCondition condition) {
-    switch (condition) {
-        case MachineCondition::New:
-            return "New";
-        case MachineCondition::Used:
-            return "Used";
-    }
-
-    return "Unknown MachineCondition";
-}
-
-std::string toString(MachineState state) {
-    switch (state) {
-        case MachineState::Available:
-            return "Available";
-        case MachineState::Assigned:
-            return "Assigned";
-        case MachineState::Maintenance:
-            return "Maintenance";
-    }
-
-    return "Unknown MachineState";
 }

@@ -1,15 +1,15 @@
 #include "../../headers/service/finance_service.h"
 
 FinanceService::FinanceService(Company& company,
-                               MachineRepository& machineRepository,
+                               EquipmentRepository& equipmentRepository,
                                ProjectRepository& projectRepository)
     : company_(company),
-      machineRepository_(machineRepository),
+      equipmentRepository_(equipmentRepository),
       projectRepository_(projectRepository) {}
 
-bool FinanceService::buyMachine(MachineType type,
-                                int price,
-                                MachineCondition condition) {
+bool FinanceService::buyEquipment(EquipmentType type,
+                                   int price,
+                                   EquipmentCondition condition) {
     if (price < 0) {
         return false;
     }
@@ -18,23 +18,23 @@ bool FinanceService::buyMachine(MachineType type,
         return false;
     }
 
-    Machine machine(nextMachineId_++, type, price);
-    machine.setCondition(condition);
-    machineRepository_.add(machine);
+    Equipment equipment(nextEquipmentId_++, type, price);
+    equipment.setCondition(condition);
+    equipmentRepository_.add(equipment);
     return true;
 }
 
-bool FinanceService::sellMachine(int machineId, int salePrice) {
+bool FinanceService::sellEquipment(int equipmentId, int salePrice) {
     if (salePrice < 0) {
         return false;
     }
 
-    const auto machine = machineRepository_.findById(machineId);
-    if (!machine.has_value()) {
+    const auto equipment = equipmentRepository_.findById(equipmentId);
+    if (!equipment.has_value()) {
         return false;
     }
 
-    if (!machineRepository_.remove(machineId)) {
+    if (!equipmentRepository_.remove(equipmentId)) {
         return false;
     }
 

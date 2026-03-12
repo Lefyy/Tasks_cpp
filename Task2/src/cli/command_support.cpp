@@ -113,43 +113,43 @@ void printProjectSummary(const Project& project) {
     std::cout << "\n";
 }
 
-int salePriceForMachine(const Machine& machine) {
-    if (machine.getCondition() == MachineCondition::Used) {
-        return machine.getPrice() / 2;
+int salePriceForEquipment(const Equipment& equipment) {
+    if (equipment.getCondition() == EquipmentCondition::Used) {
+        return equipment.getPrice() / 2;
     }
-    return machine.getPrice();
+    return equipment.getPrice();
 }
 
-void printMachineSummary(const Machine& machine) {
+void printEquipmentSummary(const Equipment& equipment) {
     printSeparator();
-    printKeyValueRow("ID", std::to_string(machine.getId()));
-    printKeyValueRow("Тип", toString(machine.getType()));
-    printKeyValueRow("Состояние", toString(machine.getState()));
-    printKeyValueRow("Износ", toString(machine.getCondition()));
-    printKeyValueRow("Проект", std::to_string(machine.getAssignedProjectId()));
-    printKeyValueRow("Цена продажи", std::to_string(salePriceForMachine(machine)));
+    printKeyValueRow("ID", std::to_string(equipment.getId()));
+    printKeyValueRow("Тип", toString(equipment.getType()));
+    printKeyValueRow("Состояние", toString(equipment.getState()));
+    printKeyValueRow("Износ", toString(equipment.getCondition()));
+    printKeyValueRow("Проект", std::to_string(equipment.getAssignedProjectId()));
+    printKeyValueRow("Цена продажи", std::to_string(salePriceForEquipment(equipment)));
     std::cout << "\n";
 }
 
-int countAssignedByType(const InMemoryMachineRepository& machineRepository,
+int countAssignedByType(const InMemoryEquipmentRepository& equipmentRepository,
                         const std::unordered_map<int, std::vector<int>>& assignments,
                         int projectId,
-                        MachineType type) {
+                        EquipmentType type) {
     int assigned = 0;
     const auto projectIt = assignments.find(projectId);
     if (projectIt == assignments.end()) {
         return 0;
     }
 
-    for (const int machineId : projectIt->second) {
-        const auto machine = machineRepository.findById(machineId);
-        if (!machine.has_value()) {
+    for (const int equipmentId : projectIt->second) {
+        const auto equipment = equipmentRepository.findById(equipmentId);
+        if (!equipment.has_value()) {
             continue;
         }
 
-        if (machine->getType() == type &&
-            machine->getState() == MachineState::Assigned &&
-            machine->getAssignedProjectId() == projectId) {
+        if (equipment->getType() == type &&
+            equipment->getState() == EquipmentState::Assigned &&
+            equipment->getAssignedProjectId() == projectId) {
             ++assigned;
         }
     }

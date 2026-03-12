@@ -27,12 +27,12 @@ Project makeProject(int id,
 
 Application::Application()
     : company_("Task2 Construction", "Moscow", 2'000'000),
-      machineRepository_(),
+      equipmentRepository_(),
       projectRepository_(),
-      financeService_(company_, machineRepository_, projectRepository_),
+      financeService_(company_, equipmentRepository_, projectRepository_),
       constructionService_(company_,
                            projectRepository_,
-                           machineRepository_,
+                           equipmentRepository_,
                            const_cast<ResourcePack&>(financeService_.stockResources())),
       simulationService_(constructionService_) {
     registerCommands();
@@ -119,7 +119,7 @@ void Application::bootstrapDefaults() {
 
 void Application::registerCommands() {
     AppContext context{company_,
-                       machineRepository_,
+                       equipmentRepository_,
                        projectRepository_,
                        financeService_,
                        constructionService_,

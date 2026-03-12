@@ -5,27 +5,27 @@
 
 #include "../domain/company.h"
 #include "../repository/project_repository.h"
-#include "../repository/machine_repository.h"
+#include "../repository/equipment_repository.h"
 
 class ConstructionService {
 public:
-    enum class AssignMachineResult {
+    enum class AssignEquipmentResult {
         Success,
-        MachineNotFound,
-        MachineBusy,
+        EquipmentNotFound,
+        EquipmentBusy,
         ProjectNotFound,
         InvalidProjectState,
     };
 
-    enum class ReleaseMachineResult {
+    enum class ReleaseEquipmentResult {
         Success,
-        MachineNotFound,
-        MachineNotAssigned,
+        EquipmentNotFound,
+        EquipmentNotAssigned,
     };
 
     ConstructionService(Company& company,
                         ProjectRepository& projectRepository,
-                        MachineRepository& machineRepository,
+                        EquipmentRepository& equipmentRepository,
                         ResourcePack& resourceStock);
 
     bool takeProject(int projectId);
@@ -33,8 +33,8 @@ public:
     bool continueProject(int projectId);
     bool dropProject(int projectId);
 
-    AssignMachineResult assignMachine(int machineId, int projectId);
-    ReleaseMachineResult releaseMachine(int machineId);
+    AssignEquipmentResult assignEquipment(int equipmentId, int projectId);
+    ReleaseEquipmentResult releaseEquipment(int equipmentId);
 
     std::unordered_map<int, std::vector<int>> getAssignments() const;
 
@@ -46,7 +46,7 @@ private:
 
     Company& company_;
     ProjectRepository& projectRepository_;
-    MachineRepository& machineRepository_;
+    EquipmentRepository& equipmentRepository_;
     ResourcePack& resourceStock_;
     std::unordered_map<int, std::vector<int>> assignmentsByProject_;
 };

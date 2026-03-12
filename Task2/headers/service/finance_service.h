@@ -2,20 +2,20 @@
 
 #include "../domain/company.h"
 #include "../domain/project.h"
-#include "../repository/machine_repository.h"
+#include "../repository/equipment_repository.h"
 #include "../repository/project_repository.h"
 
 class FinanceService {
 public:
     FinanceService(Company& company,
-                   MachineRepository& machineRepository,
+                   EquipmentRepository& equipmentRepository,
                    ProjectRepository& projectRepository);
 
-    bool buyMachine(MachineType type,
-                    int price,
-                    MachineCondition condition = MachineCondition::New);
+    bool buyEquipment(EquipmentType type,
+                      int price,
+                      EquipmentCondition condition = EquipmentCondition::New);
 
-    bool sellMachine(int machineId, int salePrice);
+    bool sellEquipment(int equipmentId, int salePrice);
 
     bool buyResources(const ResourcePack& resources,
                       const std::unordered_map<ResourceType, int>& pricesPerUnit);
@@ -31,8 +31,8 @@ public:
 
 private:
     Company& company_;
-    MachineRepository& machineRepository_;
+    EquipmentRepository& equipmentRepository_;
     ProjectRepository& projectRepository_;
     ResourcePack stockResources_;
-    int nextMachineId_{1};
+    int nextEquipmentId_{1};
 };

@@ -7,7 +7,7 @@
 #include "../cli/commands/command.h"
 #include "../cli/main_menu_action.h"
 #include "../domain/company.h"
-#include "../repository/machine_repository.h"
+#include "../repository/equipment_repository.h"
 #include "../repository/project_repository.h"
 #include "../service/construction_service.h"
 #include "../service/finance_service.h"
@@ -26,7 +26,7 @@ private:
 
     Company company_;
 
-    InMemoryMachineRepository machineRepository_;
+    InMemoryEquipmentRepository equipmentRepository_;
     InMemoryProjectRepository projectRepository_;
 
     FinanceService financeService_;

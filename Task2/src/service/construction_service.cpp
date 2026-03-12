@@ -5,11 +5,11 @@
 
 ConstructionService::ConstructionService(Company& company,
                                          ProjectRepository& projectRepository,
-                                         MachineRepository& machineRepository,
+                                         EquipmentRepository& equipmentRepository,
                                          ResourcePack& resourceStock)
     : company_(company),
       projectRepository_(projectRepository),
-      machineRepository_(machineRepository),
+      equipmentRepository_(equipmentRepository),
       resourceStock_(resourceStock) {}
 
 bool ConstructionService::takeProject(int projectId) {
@@ -64,11 +64,11 @@ bool ConstructionService::dropProject(int projectId) {
 
     const auto assignedIt = assignmentsByProject_.find(projectId);
     if (assignedIt != assignmentsByProject_.end()) {
-        for (const int machineId : assignedIt->second) {
-            auto machine = machineRepository_.findById(machineId);
-            if (machine.has_value()) {
-                machine->releaseFromProject();
-                machineRepository_.update(*machine);
+        for (const int eqId : assignedIt->second) {
+            auto equipment = equipmentRepository_.findById(eqId);
+            if (equipment.has_value()) {
+                equipment->releaseFromProject();
+                equipmentRepository_.update(*equipment);
             }
         }
 
@@ -78,68 +78,68 @@ bool ConstructionService::dropProject(int projectId) {
     return true;
 }
 
-ConstructionService::AssignMachineResult ConstructionService::assignMachine(int machineId, int projectId) {
+ConstructionService::AssignEquipmentResult ConstructionService::assignEquipment(int equipmentId, int projectId) {
     const auto project = projectRepository_.findById(projectId);
     if (!project.has_value()) {
-        return AssignMachineResult::ProjectNotFound;
+        return AssignEquipmentResult::ProjectNotFound;
     }
 
     if (project->getState() != ProjectState::Active) {
-        return AssignMachineResult::InvalidProjectState;
+        return AssignEquipmentResult::InvalidProjectState;
 
     }
 
-    auto machine = machineRepository_.findById(machineId);
-    if (!machine.has_value()) {
-        return AssignMachineResult::MachineNotFound;
+    auto equipment = equipmentRepository_.findById(equipmentId);
+    if (!equipment.has_value()) {
+        return AssignEquipmentResult::EquipmentNotFound;
     }
 
-    if (machine->getState() != MachineState::Available) {
-        return AssignMachineResult::MachineBusy;
+    if (equipment->getState() != EquipmentState::Available) {
+        return AssignEquipmentResult::EquipmentBusy;
 
     }
 
-    machine->setState(MachineState::Assigned);
-    machine->setAssignedProjectId(projectId);
-    if (!machineRepository_.update(*machine)) {
-        return AssignMachineResult::MachineBusy;
+    equipment->setState(EquipmentState::Assigned);
+    equipment->setAssignedProjectId(projectId);
+    if (!equipmentRepository_.update(*equipment)) {
+        return AssignEquipmentResult::EquipmentBusy;
     }
 
-    assignmentsByProject_[projectId].push_back(machineId);
-    return AssignMachineResult::Success;
+    assignmentsByProject_[projectId].push_back(equipmentId);
+    return AssignEquipmentResult::Success;
 }
 
-ConstructionService::ReleaseMachineResult ConstructionService::releaseMachine(int machineId) {
-    auto machine = machineRepository_.findById(machineId);
-    if (!machine.has_value()) {
-        return ReleaseMachineResult::MachineNotFound;
+ConstructionService::ReleaseEquipmentResult ConstructionService::releaseEquipment(int equipmentId) {
+    auto equipment = equipmentRepository_.findById(equipmentId);
+    if (!equipment.has_value()) {
+        return ReleaseEquipmentResult::EquipmentNotFound;
     }
 
-    if (machine->getState() != MachineState::Assigned || machine->getAssignedProjectId() < 0) {
-        return ReleaseMachineResult::MachineNotAssigned;
+    if (equipment->getState() != EquipmentState::Assigned || equipment->getAssignedProjectId() < 0) {
+        return ReleaseEquipmentResult::EquipmentNotAssigned;
 
     }
 
-    const int projectId = machine->getAssignedProjectId();
+    const int projectId = equipment->getAssignedProjectId();
     auto assignmentIt = assignmentsByProject_.find(projectId);
     if (assignmentIt != assignmentsByProject_.end()) {
-        auto& machineIds = assignmentIt->second;
-        machineIds.erase(
-            std::remove(machineIds.begin(), machineIds.end(), machineId),
-            machineIds.end());
+        auto& equipmentIds = assignmentIt->second;
+        equipmentIds.erase(
+            std::remove(equipmentIds.begin(), equipmentIds.end(), equipmentId),
+            equipmentIds.end());
 
-        if (machineIds.empty()) {
+        if (equipmentIds.empty()) {
             assignmentsByProject_.erase(assignmentIt);
 
         }
     }
 
-    machine->releaseFromProject();
-    if (!machineRepository_.update(*machine)) {
-        return ReleaseMachineResult::MachineNotAssigned;
+    equipment->releaseFromProject();
+    if (!equipmentRepository_.update(*equipment)) {
+        return ReleaseEquipmentResult::EquipmentNotAssigned;
     }
 
-    return ReleaseMachineResult::Success;
+    return ReleaseEquipmentResult::Success;
 
 }
 
@@ -170,26 +170,26 @@ std::vector<int> ConstructionService::advanceWeek() {
 }
 
 bool ConstructionService::hasRequirements(const Project& project) const {
-    const auto& requiredMachines = project.getCurrentPhase().getRequirements().machines;
+    const auto& requiredEquipments = project.getCurrentPhase().getRequirements().equipments;
 
-    std::unordered_map<MachineType, int> assignedByType;
+    std::unordered_map<EquipmentType, int> assignedByType;
     const auto assignmentIt = assignmentsByProject_.find(project.getId());
     if (assignmentIt != assignmentsByProject_.end()) {
-        for (const int machineId : assignmentIt->second) {
-            const auto machine = machineRepository_.findById(machineId);
-            if (!machine.has_value()) {
+        for (const int equipmentId : assignmentIt->second) {
+            const auto equipment = equipmentRepository_.findById(equipmentId);
+            if (!equipment.has_value()) {
                 continue;
             }
 
-            if (machine->getState() == MachineState::Assigned &&
-                machine->getAssignedProjectId() == project.getId()) {
-                ++assignedByType[machine->getType()];
+            if (equipment->getState() == EquipmentState::Assigned &&
+                equipment->getAssignedProjectId() == project.getId()) {
+                ++assignedByType[equipment->getType()];
             }
         }
     }
 
-    for (const auto& [machineType, requiredCount] : requiredMachines) {
-        const int assignedCount = assignedByType[machineType];
+    for (const auto& [equipmentType, requiredCount] : requiredEquipments) {
+        const int assignedCount = assignedByType[equipmentType];
         if (assignedCount < requiredCount) {
             return false;
         }

@@ -107,34 +107,34 @@ void MyProjectsMenuCommand::execute(const std::vector<std::string>&) {
 
         const auto& required = project->getCurrentPhase().getRequirements().machines;
         const auto assignments = context_.constructionService.getAssignments();
-        std::vector<Machine> candidateMachines;
+        std::vector<Equipment> candidateEquipment;
 
-        for (const auto& machine : context_.machineRepository.findAll()) {
-            if (machine.getState() != MachineState::Available) {
+        for (const auto& equipment : context_.equipmentRepository.findAll()) {
+            if (equipment.getState() != EquipmentState::Available) {
                 continue;
             }
 
-            const auto reqIt = required.find(machine.getType());
+            const auto reqIt = required.find(equipment.getType());
             if (reqIt == required.end()) {
                 continue;
             }
 
-            const int assignedCount = countAssignedByType(context_.machineRepository,
+            const int assignedCount = countAssignedByType(context_.equipmentRepository,
                                                           assignments,
                                                           projectId,
-                                                          machine.getType());
+                                                          equipment.getType());
             if (assignedCount >= reqIt->second) {
                 continue;
             }
 
-            candidateMachines.push_back(machine);
+            candidateEquipment.push_back(equipment);
         }
 
-        for (const auto& machine : candidateMachines) {
-            printMachineSummary(machine);
+        for (const auto& equipment : candidateEquipment) {
+            printEquipmentSummary(equipment);
         }
 
-        std::cout << "Введите id машины для назначения на проект или back для выхода.\n";
+        std::cout << "Введите id оборудования для назначения на проект или back для выхода.\n";
         std::string input;
         if (!std::getline(std::cin, input)) {
             return;
@@ -144,11 +144,11 @@ void MyProjectsMenuCommand::execute(const std::vector<std::string>&) {
             continue;
         }
 
-        int machineId = 0;
-        if (!parseInt(input, machineId)) {
+        int equipmentId = 0;
+        if (!parseInt(input, equipmentId)) {
             continue;
         }
 
-        context_.constructionService.assignMachine(machineId, projectId);
+        context_.constructionService.assignEquipment(equipmentId, projectId);
     }
 }
