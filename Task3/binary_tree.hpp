@@ -7,6 +7,38 @@ template <typename T>
 BinaryTree<T>::BinaryTree() : root(nullptr) {}
 
 template <typename T>
+BinaryTree<T>::BinaryTree(const BinaryTree& other) : root(clone(other.root)) {}
+
+template <typename T>
+BinaryTree<T>::BinaryTree(BinaryTree&& other) noexcept : root(other.root) {
+    other.root = nullptr;
+}
+
+template <typename T>
+BinaryTree<T>& BinaryTree<T>::operator=(const BinaryTree& other) {
+    if (this == &other) {
+        return *this;
+    }
+
+    Node* newRoot = clone(other.root);
+    clear(root);
+    root = newRoot;
+    return *this;
+}
+
+template <typename T>
+BinaryTree<T>& BinaryTree<T>::operator=(BinaryTree&& other) noexcept {
+    if (this == &other) {
+        return *this;
+    }
+
+    clear(root);
+    root = other.root;
+    other.root = nullptr;
+    return *this;
+}
+
+template <typename T>
 BinaryTree<T>::~BinaryTree() {
     clear(root);
 }
@@ -80,4 +112,21 @@ std::vector<T> BinaryTree<T>::inOrder() const {
     std::vector<T> result;
     inOrder(root, result);
     return result;
+}
+
+template <typename T>
+typename BinaryTree<T>::Node* BinaryTree<T>::clone(Node* node) const {
+    if (!node) {
+        return nullptr;
+    }
+
+    Node* copied = new Node(node->value);
+    try {
+        copied->left = clone(node->left);
+        copied->right = clone(node->right);
+    } catch (...) {
+        clear(copied);
+        throw;
+    }
+    return copied;
 }

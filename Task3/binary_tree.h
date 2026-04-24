@@ -22,11 +22,18 @@ private:
 
 public:
     BinaryTree();
+    BinaryTree(const BinaryTree& other);
+    BinaryTree(BinaryTree&& other) noexcept;
+    BinaryTree& operator=(const BinaryTree& other);
+    BinaryTree& operator=(BinaryTree&& other) noexcept;
     ~BinaryTree();
 
     void insert(const T& value);
     bool contains(const T& value) const;
     std::vector<T> inOrder() const;
+
+private:
+    Node* clone(Node* node) const;
 };
 
 #include "binary_tree.hpp"
